@@ -1,5 +1,270 @@
 [
  {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022306",
+  "source": "SEC 8-K",
+  "company": "NATIONAL HEALTHCARE CORP",
+  "ticker": "NHC",
+  "cik": "0001047335",
+  "title": "8-K — NATIONAL HEALTHCARE CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/1047335/000143774926022306/0001437749-26-022306-index.htm",
+  "published": "2026-07-01T16:43:00-04:00",
+  "detected_at": "2026-07-01T22:04:00.840771+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "1.02 Termination of a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "7.01 Regulation FD Disclosure",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031564",
+  "source": "SEC 8-K",
+  "company": "ChronoScale Corp",
+  "ticker": "CHRN",
+  "cik": "0001549084",
+  "title": "8-K12B — ChronoScale Corp",
+  "url": "https://www.sec.gov/Archives/edgar/data/1549084/000149315226031564/0001493152-26-031564-index.htm",
+  "published": "2026-07-01T16:43:06-04:00",
+  "detected_at": "2026-07-01T22:04:00.466737+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "3.01 Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; Transfer of Listing",
+   "3.03 Material Modifications to Rights of Security Holders",
+   "5.01 Changes in Control of Registrant",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292723",
+  "source": "SEC 8-K",
+  "company": "NASDAQ, INC.",
+  "ticker": "NDAQ",
+  "cik": "0001120193",
+  "title": "8-K — NASDAQ, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1120193/000119312526292723/0001193125-26-292723-index.htm",
+  "published": "2026-07-01T16:47:02-04:00",
+  "detected_at": "2026-07-01T22:03:59.674377+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "1.02 Termination of a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "joint venture",
+   "letter of intent"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, joint venture, letter of intent"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074365",
+  "source": "SEC 8-K",
+  "company": "ACTELIS NETWORKS INC",
+  "ticker": "ASNS",
+  "cik": "0001141284",
+  "title": "8-K — ACTELIS NETWORKS INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/1141284/000121390026074365/0001213900-26-074365-index.htm",
+  "published": "2026-07-01T16:53:44-04:00",
+  "detected_at": "2026-07-01T22:03:58.498727+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "3.02 Unregistered Sales of Equity Securities",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292783",
+  "source": "SEC 8-K",
+  "company": "Morgan Stanley Direct Lending Fund",
+  "ticker": "MSDL",
+  "cik": "0001782524",
+  "title": "8-K — Morgan Stanley Direct Lending Fund",
+  "url": "https://www.sec.gov/Archives/edgar/data/1782524/000119312526292783/0001193125-26-292783-index.htm",
+  "published": "2026-07-01T17:01:20-04:00",
+  "detected_at": "2026-07-01T22:03:55.588436+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [
+   "Brookfield"
+  ],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001773751-26-000146",
+  "source": "SEC 8-K",
+  "company": "Hims & Hers Health, Inc.",
+  "ticker": "HIMS",
+  "cik": "0001773751",
+  "title": "8-K — Hims & Hers Health, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1773751/000177375126000146/0001773751-26-000146-index.htm",
+  "published": "2026-07-01T17:02:46-04:00",
+  "detected_at": "2026-07-01T22:03:54.764601+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "license agreement",
+   "joint venture",
+   "purchase order"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: license agreement, joint venture, purchase order"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031590",
+  "source": "SEC 8-K",
+  "company": "OneMedNet Corp",
+  "ticker": "ONMDW",
+  "cik": "0001849380",
+  "title": "8-K — OneMedNet Corp",
+  "url": "https://www.sec.gov/Archives/edgar/data/1849380/000149315226031590/0001493152-26-031590-index.htm",
+  "published": "2026-07-01T17:20:26-04:00",
+  "detected_at": "2026-07-01T22:03:51.246555+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292834",
+  "source": "SEC 8-K",
+  "company": "Avalyn Pharma Inc.",
+  "ticker": "AVLN",
+  "cik": "0001540171",
+  "title": "8-K — Avalyn Pharma Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1540171/000119312526292834/0001193125-26-292834-index.htm",
+  "published": "2026-07-01T17:20:55-04:00",
+  "detected_at": "2026-07-01T22:03:50.762074+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-079925",
+  "source": "SEC 8-K",
+  "company": "Jackson Financial Inc.",
+  "ticker": "JXN-PA",
+  "cik": "0001822993",
+  "title": "8-K — Jackson Financial Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1822993/000110465926079925/0001104659-26-079925-index.htm",
+  "published": "2026-07-01T17:23:01-04:00",
+  "detected_at": "2026-07-01T22:03:50.027906+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture",
+   "letter of intent",
+   "purchase order"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture, letter of intent, purchase order"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074421",
+  "source": "SEC 8-K",
+  "company": "Cadrenal Therapeutics, Inc.",
+  "ticker": "CVKD",
+  "cik": "0001937993",
+  "title": "8-K — Cadrenal Therapeutics, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1937993/000121390026074421/0001213900-26-074421-index.htm",
+  "published": "2026-07-01T17:23:30-04:00",
+  "detected_at": "2026-07-01T22:03:49.228688+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "3.02 Unregistered Sales of Equity Securities",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001640334-26-001144",
+  "source": "SEC 8-K",
+  "company": "Stark Focus Group, Inc.",
+  "ticker": "SKFG",
+  "cik": "0001794942",
+  "title": "8-K — Stark Focus Group, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1794942/000164033426001144/0001640334-26-001144-index.htm",
+  "published": "2026-07-01T17:29:21-04:00",
+  "detected_at": "2026-07-01T22:03:48.730064+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "5.01 Changes in Control of Registrant",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031596",
+  "source": "SEC 8-K",
+  "company": "RANGE IMPACT, INC.",
+  "ticker": "RNGE",
+  "cik": "0001438943",
+  "title": "8-K — RANGE IMPACT, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1438943/000149315226031596/0001493152-26-031596-index.htm",
+  "published": "2026-07-01T17:29:53-04:00",
+  "detected_at": "2026-07-01T22:03:48.338103+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "3.02 Unregistered Sales of Equity Securities",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [
+   "Microsoft"
+  ],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
   "id": "urn:tag:sec.gov,2008:accession-number=0002058873-26-000025",
   "source": "SEC 8-K",
   "company": "Qnity Electronics, Inc.",
