@@ -1,5 +1,50 @@
 [
  {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074244",
+  "source": "SEC 8-K",
+  "company": "RESIDEO TECHNOLOGIES, INC.",
+  "ticker": "REZI",
+  "cik": "0001740332",
+  "title": "8-K — RESIDEO TECHNOLOGIES, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1740332/000121390026074244/0001213900-26-074244-index.htm",
+  "published": "2026-07-01T16:12:10-04:00",
+  "detected_at": "2026-07-01T20:14:43.138416+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "7.01 Regulation FD Disclosure",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "distribution agreement",
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, distribution agreement, joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-079868",
+  "source": "SEC 8-K",
+  "company": "NN INC",
+  "ticker": "NNBR",
+  "cik": "0000918541",
+  "title": "8-K — NN INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/918541/000110465926079868/0001104659-26-079868-index.htm",
+  "published": "2026-07-01T16:12:22-04:00",
+  "detected_at": "2026-07-01T20:14:41.519301+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "3.02 Unregistered Sales of Equity Securities",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
   "id": "urn:tag:sec.gov,2008:accession-number=0000913142-26-000029",
   "source": "SEC 8-K",
   "company": "BELDEN INC.",
