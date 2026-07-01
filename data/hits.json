@@ -1,5 +1,223 @@
 [
  {
+  "id": "urn:tag:sec.gov,2008:accession-number=0002058873-26-000025",
+  "source": "SEC 8-K",
+  "company": "Qnity Electronics, Inc.",
+  "ticker": "Q",
+  "cik": "0002058873",
+  "title": "8-K — Qnity Electronics, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/2058873/000205887326000025/0002058873-26-000025-index.htm",
+  "published": "2026-07-01T16:29:19-04:00",
+  "detected_at": "2026-07-01T20:42:44.122568+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "license agreement",
+   "distribution agreement",
+   "joint venture",
+   "letter of intent"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, license agreement, distribution agreement, joint venture, letter of intent"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292657",
+  "source": "SEC 8-K",
+  "company": "GATX CORP",
+  "ticker": "GATX",
+  "cik": "0000040211",
+  "title": "8-K — GATX CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/40211/000119312526292657/0001193125-26-292657-index.htm",
+  "published": "2026-07-01T16:30:27-04:00",
+  "detected_at": "2026-07-01T20:42:40.508557+00:00",
+  "items": [
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "partnership agreement",
+   "definitive agreement",
+   "joint venture",
+   "purchase order"
+  ],
+  "megacaps": [
+   "Brookfield"
+  ],
+  "reason": "keywords: partnership agreement, definitive agreement, joint venture, purchase order"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031561",
+  "source": "SEC 8-K",
+  "company": "Mama's Creations, Inc.",
+  "ticker": "MAMA",
+  "cik": "0001520358",
+  "title": "8-K — Mama's Creations, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1520358/000149315226031561/0001493152-26-031561-index.htm",
+  "published": "2026-07-01T16:30:28-04:00",
+  "detected_at": "2026-07-01T20:42:39.265076+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031558",
+  "source": "SEC 8-K",
+  "company": "Trio Petroleum Corp",
+  "ticker": "TPET",
+  "cik": "0001898766",
+  "title": "8-K — Trio Petroleum Corp",
+  "url": "https://www.sec.gov/Archives/edgar/data/1898766/000149315226031558/0001493152-26-031558-index.htm",
+  "published": "2026-07-01T16:30:28-04:00",
+  "detected_at": "2026-07-01T20:42:38.369007+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "material definitive agreement"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, material definitive agreement"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0000950142-26-001951",
+  "source": "SEC 8-K",
+  "company": "AVIS BUDGET GROUP, INC.",
+  "ticker": "CAR",
+  "cik": "0000723612",
+  "title": "8-K — AVIS BUDGET GROUP, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/723612/000095014226001951/0000950142-26-001951-index.htm",
+  "published": "2026-07-01T16:30:29-04:00",
+  "detected_at": "2026-07-01T20:42:37.845181+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031560",
+  "source": "SEC 8-K",
+  "company": "EXOZYMES INC.",
+  "ticker": "EXOZ",
+  "cik": "0002010788",
+  "title": "8-K — EXOZYMES INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/2010788/000149315226031560/0001493152-26-031560-index.htm",
+  "published": "2026-07-01T16:30:29-04:00",
+  "detected_at": "2026-07-01T20:42:36.761868+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0000877860-26-000169",
+  "source": "SEC 8-K",
+  "company": "NATIONAL HEALTH INVESTORS INC",
+  "ticker": "NHI",
+  "cik": "0000877860",
+  "title": "8-K — NATIONAL HEALTH INVESTORS INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/877860/000087786026000169/0000877860-26-000169-index.htm",
+  "published": "2026-07-01T16:32:28-04:00",
+  "detected_at": "2026-07-01T20:42:35.203992+00:00",
+  "items": [
+   "1.02 Termination of a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "material definitive agreement"
+  ],
+  "megacaps": [],
+  "reason": "keywords: definitive agreement, material definitive agreement"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001709442-26-000039",
+  "source": "SEC 8-K",
+  "company": "FIRSTSUN CAPITAL BANCORP",
+  "ticker": "FSUN",
+  "cik": "0001709442",
+  "title": "8-K — FIRSTSUN CAPITAL BANCORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/1709442/000170944226000039/0001709442-26-000039-index.htm",
+  "published": "2026-07-01T16:38:59-04:00",
+  "detected_at": "2026-07-01T20:42:30.505203+00:00",
+  "items": [
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture",
+   "memorandum of understanding"
+  ],
+  "megacaps": [],
+  "reason": "keywords: joint venture, memorandum of understanding"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292702",
+  "source": "SEC 8-K",
+  "company": "KOHLS Corp",
+  "ticker": "KSS",
+  "cik": "0000885639",
+  "title": "8-K — KOHLS Corp",
+  "url": "https://www.sec.gov/Archives/edgar/data/885639/000119312526292702/0001193125-26-292702-index.htm",
+  "published": "2026-07-01T16:39:21-04:00",
+  "detected_at": "2026-07-01T20:42:29.701281+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture",
+   "purchase order"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture, purchase order"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292704",
+  "source": "SEC 8-K",
+  "company": "Jade Biosciences, Inc.",
+  "ticker": "JBIO",
+  "cik": "0001798749",
+  "title": "8-K — Jade Biosciences, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1798749/000119312526292704/0001193125-26-292704-index.htm",
+  "published": "2026-07-01T16:41:06-04:00",
+  "detected_at": "2026-07-01T20:42:28.578751+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "material definitive agreement",
+   "license agreement"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, material definitive agreement, license agreement"
+ },
+ {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292561",
   "source": "SEC 8-K",
   "company": "MARCHEX INC",
