@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Catalyst Tape</title>
+<style>
+  :root {
+    --bg: #0b0e13;
+    --panel: #11151d;
+    --border: #1e2430;
+    --text: #c8d0dc;
+    --dim: #5c6675;
+    --hot: #ffd21f;
+    --warm: #d4b344;
+    --sec: #4da3ff;
+    --wire: #9a7bff;
+    --cap: #3ddc84;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.5 "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+  }
+  header {
+    display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+    padding: 18px 22px 10px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 2;
+  }
+  h1 { font-size: 17px; margin: 0; letter-spacing: 2px; color: #fff; }
+  h1 .blink { color: var(--hot); animation: pulse 1.6s infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  #meta { color: var(--dim); font-size: 12px; }
+  #filter {
+    margin-left: auto; background: var(--panel); border: 1px solid var(--border);
+    color: var(--text); padding: 5px 10px; border-radius: 4px; font: inherit;
+    font-size: 12px; width: 220px;
+  }
+  #filter:focus { outline: 1px solid var(--sec); }
+  #tape { padding: 10px 22px 60px; max-width: 1100px; margin: 0 auto; }
+  .hit {
+    display: block; text-decoration: none; color: inherit;
+    background: var(--panel); border: 1px solid var(--border);
+    border-left: 3px solid var(--border);
+    border-radius: 6px; padding: 10px 14px; margin: 8px 0;
+    transition: border-color .2s;
+  }
+  .hit:hover { border-color: var(--sec); }
+  .hit.hot {
+    border-left-color: var(--hot);
+    box-shadow: 0 0 14px rgba(255, 210, 31, .22), inset 0 0 30px rgba(255, 210, 31, .04);
+  }
+  .hit.hot .age { color: var(--hot); font-weight: 700; }
+  .hit.warm { border-left-color: var(--warm); }
+  .hit.warm .age { color: var(--warm); }
+  .row1 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .age { color: var(--dim); font-size: 12px; min-width: 58px; }
+  .ticker {
+    background: #1a2233; color: #dfe8ff; border-radius: 4px;
+    padding: 1px 7px; font-weight: 700; font-size: 12.5px;
+  }
+  .src { font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase;
+         padding: 1px 6px; border-radius: 3px; }
+  .src.sec  { color: var(--sec);  border: 1px solid var(--sec); }
+  .src.wire { color: var(--wire); border: 1px solid var(--wire); }
+  .title { font-weight: 600; color: #e8edf5; }
+  .reason { color: var(--dim); font-size: 12px; margin-top: 3px; }
+  .caps { color: var(--cap); font-size: 12px; margin-top: 2px; }
+  .old { opacity: .55; }
+  .stale { opacity: .32; }
+  #empty { color: var(--dim); padding: 40px 0; text-align: center; }
+  footer {
+    color: var(--dim); font-size: 11px; text-align: center;
+    padding: 14px; border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1><span class="blink">●</span> CATALYST TAPE</h1>
+  <span id="meta">loading…</span>
+  <input id="filter" placeholder="filter: ticker, company, keyword…">
+</header>
+<div id="tape"></div>
+<footer>SEC EDGAR 8-K + newswire RSS · auto-refresh 60s · research, not investment advice</footer>
+<script>
+const tape = document.getElementById("tape");
+const meta = document.getElementById("meta");
+const filterBox = document.getElementById("filter");
+let hits = [];
+
+function ago(iso) {
+  const mins = Math.floor((Date.now() - new Date(iso)) / 60000);
+  if (mins < 1) return "now";
+  if (mins < 60) return mins + "m";
+  if (mins < 1440) return Math.floor(mins / 60) + "h" + (mins % 60 ? String(mins % 60).padStart(2, "0") : "");
+  return Math.floor(mins / 1440) + "d";
+}
+
+function heatClass(iso) {
+  const mins = (Date.now() - new Date(iso)) / 60000;
+  if (mins < 30) return "hot";        // fresh: glowing signal yellow
+  if (mins < 180) return "warm";      // cooling
+  if (mins < 1440) return "old";
+  return "stale";
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function render() {
+  const q = filterBox.value.trim().toLowerCase();
+  const rows = hits.filter(h => !q ||
+    JSON.stringify([h.ticker, h.company, h.title, h.keywords, h.megacaps, h.reason])
+      .toLowerCase().includes(q));
+  if (!rows.length) {
+    tape.innerHTML = '<div id="empty">no hits' + (q ? " matching “" + esc(q) + "”" : " yet — the tape fills as the scanner runs") + "</div>";
+    return;
+  }
+  tape.innerHTML = rows.map(h => {
+    const cls = heatClass(h.detected_at);
+    const srcCls = h.source.startsWith("SEC") ? "sec" : "wire";
+    return `<a class="hit ${cls}" href="${esc(h.url)}" target="_blank" rel="noopener">
+      <div class="row1">
+        <span class="age">${ago(h.detected_at)}</span>
+        ${h.ticker ? `<span class="ticker">${esc(h.ticker)}</span>` : ""}
+        <span class="src ${srcCls}">${esc(h.source)}</span>
+        <span class="title">${esc(h.company || h.title)}</span>
+      </div>
+      ${h.company && h.title && !h.title.includes(h.company) ? `<div class="reason">${esc(h.title)}</div>` : ""}
+      <div class="reason">${esc(h.reason)}</div>
+      ${h.megacaps?.length ? `<div class="caps">⚡ mentions: ${esc(h.megacaps.join(", "))}</div>` : ""}
+    </a>`;
+  }).join("");
+}
+
+async function load() {
+  try {
+    const res = await fetch("data/hits.json?t=" + Date.now());
+    hits = await res.json();
+    hits.sort((a, b) => b.detected_at.localeCompare(a.detected_at));
+    meta.textContent = hits.length + " hits · updated " + new Date().toLocaleTimeString();
+    render();
+  } catch {
+    meta.textContent = "could not load data/hits.json";
+  }
+}
+
+filterBox.addEventListener("input", render);
+load();
+setInterval(load, 60000);
+setInterval(render, 30000); // ages/heat tick over without refetch
+</script>
+</body>
+</html>

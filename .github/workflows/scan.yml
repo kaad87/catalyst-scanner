@@ -1,0 +1,42 @@
+name: Catalyst scan
+
+on:
+  schedule:
+    # Every 15 min on weekdays, 12:00-22:45 UTC — covers US premarket,
+    # market hours and the after-hours window where 8-Ks cluster.
+    - cron: "*/15 12-22 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalyst-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run scanner
+        env:
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python catalyst_scanner.py
+
+      - name: Commit new hits
+        run: |
+          git config user.name "catalyst-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/
+          if ! git diff --cached --quiet; then
+            git commit -m "scan: $(date -u +'%Y-%m-%d %H:%M') UTC"
+            git pull --rebase origin ${GITHUB_REF_NAME}
+            git push
+          fi

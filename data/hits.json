@@ -1,0 +1,461 @@
+[
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0000913142-26-000029",
+  "source": "SEC 8-K",
+  "company": "BELDEN INC.",
+  "ticker": "BDC",
+  "cik": "0000913142",
+  "title": "8-K — BELDEN INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/913142/000091314226000029/0000913142-26-000029-index.htm",
+  "published": "2026-07-01T08:34:39-04:00",
+  "detected_at": "2026-07-01T20:09:40.359037+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-079612",
+  "source": "SEC 8-K",
+  "company": "BATTALION OIL CORP",
+  "ticker": "BATL",
+  "cik": "0001282648",
+  "title": "8-K — BATTALION OIL CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/1282648/000110465926079612/0001104659-26-079612-index.htm",
+  "published": "2026-07-01T08:38:29-04:00",
+  "detected_at": "2026-07-01T20:09:40.358965+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "7.01 Regulation FD Disclosure",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-291660",
+  "source": "SEC 8-K",
+  "company": "SURF AIR MOBILITY INC.",
+  "ticker": "SRFM",
+  "cik": "0001936224",
+  "title": "8-K — SURF AIR MOBILITY INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1936224/000119312526291660/0001193125-26-291660-index.htm",
+  "published": "2026-07-01T08:56:15-04:00",
+  "detected_at": "2026-07-01T20:09:40.358922+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.02 Unregistered Sales of Equity Securities",
+   "7.01 Regulation FD Disclosure",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031446",
+  "source": "SEC 8-K",
+  "company": "BranchOut Food Inc.",
+  "ticker": "BOF",
+  "cik": "0001962481",
+  "title": "8-K — BranchOut Food Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1962481/000149315226031446/0001493152-26-031446-index.htm",
+  "published": "2026-07-01T09:00:19-04:00",
+  "detected_at": "2026-07-01T20:09:40.358893+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001140361-26-027094",
+  "source": "SEC 8-K",
+  "company": "BED BATH & BEYOND, INC.",
+  "ticker": "BBBY-WT",
+  "cik": "0001130713",
+  "title": "8-K — BED BATH & BEYOND, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1130713/000114036126027094/0001140361-26-027094-index.htm",
+  "published": "2026-07-01T09:11:33-04:00",
+  "detected_at": "2026-07-01T20:09:40.358729+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "3.02 Unregistered Sales of Equity Securities",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022218",
+  "source": "SEC 8-K",
+  "company": "GRAY MEDIA, INC",
+  "ticker": "GTN-A",
+  "cik": "0000043196",
+  "title": "8-K — GRAY MEDIA, INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/43196/000143774926022218/0001437749-26-022218-index.htm",
+  "published": "2026-07-01T09:25:15-04:00",
+  "detected_at": "2026-07-01T20:09:40.358652+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "7.01 Regulation FD Disclosure",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-079643",
+  "source": "SEC 8-K",
+  "company": "SELECT MEDICAL HOLDINGS CORP",
+  "ticker": "SEM",
+  "cik": "0001320414",
+  "title": "8-K — SELECT MEDICAL HOLDINGS CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/1320414/000110465926079643/0001104659-26-079643-index.htm",
+  "published": "2026-07-01T09:27:13-04:00",
+  "detected_at": "2026-07-01T20:09:40.358579+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.01 Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; Transfer of Listing",
+   "3.03 Material Modifications to Rights of Security Holders",
+   "5.01 Changes in Control of Registrant",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+   "7.01 Regulation FD Disclosure",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031459",
+  "source": "SEC 8-K",
+  "company": "Greenpro Capital Corp.",
+  "ticker": "GRNQ",
+  "cik": "0001597846",
+  "title": "8-K — Greenpro Capital Corp.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1597846/000149315226031459/0001493152-26-031459-index.htm",
+  "published": "2026-07-01T11:20:31-04:00",
+  "detected_at": "2026-07-01T20:09:40.350582+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031474",
+  "source": "SEC 8-K",
+  "company": "FLEXIBLE SOLUTIONS INTERNATIONAL INC",
+  "ticker": "FSI",
+  "cik": "0001069394",
+  "title": "8-K — FLEXIBLE SOLUTIONS INTERNATIONAL INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/1069394/000149315226031474/0001493152-26-031474-index.htm",
+  "published": "2026-07-01T11:53:38-04:00",
+  "detected_at": "2026-07-01T20:09:40.349670+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-291986",
+  "source": "SEC 8-K",
+  "company": "EXXON MOBIL CORP",
+  "ticker": "XOM",
+  "cik": "0000034088",
+  "title": "8-K — EXXON MOBIL CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/34088/000119312526291986/0001193125-26-291986-index.htm",
+  "published": "2026-07-01T12:34:56-04:00",
+  "detected_at": "2026-07-01T20:09:40.349452+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "3.01 Notice of Delisting or Failure to Satisfy a Continued Listing Rule or Standard; Transfer of Listing",
+   "3.03 Material Modifications to Rights of Security Holders",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-291990",
+  "source": "SEC 8-K",
+  "company": "ExxonMobil Holdings Corp",
+  "ticker": "",
+  "cik": "0002115436",
+  "title": "8-K12B — ExxonMobil Holdings Corp",
+  "url": "https://www.sec.gov/Archives/edgar/data/2115436/000119312526291990/0001193125-26-291990-index.htm",
+  "published": "2026-07-01T12:36:49-04:00",
+  "detected_at": "2026-07-01T20:09:40.349415+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.03 Material Modifications to Rights of Security Holders",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001654954-26-006459",
+  "source": "SEC 8-K",
+  "company": "Inuvo, Inc.",
+  "ticker": "INUV",
+  "cik": "0000829323",
+  "title": "8-K — Inuvo, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/829323/000165495426006459/0001654954-26-006459-index.htm",
+  "published": "2026-07-01T15:33:36-04:00",
+  "detected_at": "2026-07-01T20:09:40.348381+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "1.02 Termination of a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.02 Unregistered Sales of Equity Securities",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0000081061-26-000080",
+  "source": "SEC 8-K",
+  "company": "PUBLIX SUPER MARKETS INC",
+  "ticker": "",
+  "cik": "0000081061",
+  "title": "8-K — PUBLIX SUPER MARKETS INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/81061/000008106126000080/0000081061-26-000080-index.htm",
+  "published": "2026-07-01T15:43:20-04:00",
+  "detected_at": "2026-07-01T20:09:40.340235+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074215",
+  "source": "SEC 8-K",
+  "company": "FORUM MARKETS Inc",
+  "ticker": "FRMM",
+  "cik": "0001690080",
+  "title": "8-K — FORUM MARKETS Inc",
+  "url": "https://www.sec.gov/Archives/edgar/data/1690080/000121390026074215/0001213900-26-074215-index.htm",
+  "published": "2026-07-01T16:01:27-04:00",
+  "detected_at": "2026-07-01T20:09:40.339904+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031541",
+  "source": "SEC 8-K",
+  "company": "NextTrip, Inc.",
+  "ticker": "NTRP",
+  "cik": "0000788611",
+  "title": "8-K — NextTrip, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/788611/000149315226031541/0001493152-26-031541-index.htm",
+  "published": "2026-07-01T16:05:18-04:00",
+  "detected_at": "2026-07-01T20:09:40.339393+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074219",
+  "source": "SEC 8-K",
+  "company": "Quantum Cyber N.V.",
+  "ticker": "QUCY",
+  "cik": "0001874252",
+  "title": "8-K — Quantum Cyber N.V.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1874252/000121390026074219/0001213900-26-074219-index.htm",
+  "published": "2026-07-01T16:05:20-04:00",
+  "detected_at": "2026-07-01T20:09:40.339126+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement)"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-079864",
+  "source": "SEC 8-K",
+  "company": "QXO, Inc.",
+  "ticker": "QXO-PB",
+  "cik": "0001236275",
+  "title": "8-K — QXO, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1236275/000110465926079864/0001104659-26-079864-index.htm",
+  "published": "2026-07-01T16:05:39-04:00",
+  "detected_at": "2026-07-01T20:09:36.354722+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.03 Material Modifications to Rights of Security Holders",
+   "5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers: Compensatory Arrangements of Certain Officers",
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year",
+   "7.01 Regulation FD Disclosure",
+   "8.01 Other Events",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "partnership agreement",
+   "definitive agreement",
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: partnership agreement, definitive agreement, joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0000108385-26-000022",
+  "source": "SEC 8-K",
+  "company": "WORLD ACCEPTANCE CORP",
+  "ticker": "WRLD",
+  "cik": "0000108385",
+  "title": "8-K — WORLD ACCEPTANCE CORP",
+  "url": "https://www.sec.gov/Archives/edgar/data/108385/000010838526000022/0000108385-26-000022-index.htm",
+  "published": "2026-07-01T16:05:52-04:00",
+  "detected_at": "2026-07-01T20:09:34.325502+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "material definitive agreement"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, material definitive agreement"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074223",
+  "source": "SEC 8-K",
+  "company": "Singularity Future Technology Ltd.",
+  "ticker": "SGLY",
+  "cik": "0001422892",
+  "title": "8-K — Singularity Future Technology Ltd.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1422892/000121390026074223/0001213900-26-074223-index.htm",
+  "published": "2026-07-01T16:05:55-04:00",
+  "detected_at": "2026-07-01T20:09:32.951992+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "5.07 Submission of Matters to a Vote of Security Holders"
+  ],
+  "keywords": [
+   "definitive agreement",
+   "material definitive agreement"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: definitive agreement, material definitive agreement"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001522540-26-000048",
+  "source": "SEC 8-K",
+  "company": "Marqeta, Inc.",
+  "ticker": "MQ",
+  "cik": "0001522540",
+  "title": "8-K — Marqeta, Inc.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1522540/000152254026000048/0001522540-26-000048-index.htm",
+  "published": "2026-07-01T16:05:57-04:00",
+  "detected_at": "2026-07-01T20:09:31.898439+00:00",
+  "items": [
+   "5.03 Amendments to Articles of Incorporation or Bylaws; Change in Fiscal Year"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001683168-26-005221",
+  "source": "SEC 8-K",
+  "company": "APPLIED OPTOELECTRONICS, INC.",
+  "ticker": "AAOI",
+  "cik": "0001158114",
+  "title": "8-K — APPLIED OPTOELECTRONICS, INC.",
+  "url": "https://www.sec.gov/Archives/edgar/data/1158114/000168316826005221/0001683168-26-005221-index.htm",
+  "published": "2026-07-01T16:06:00-04:00",
+  "detected_at": "2026-07-01T20:09:30.282338+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ },
+ {
+  "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022282",
+  "source": "SEC 8-K",
+  "company": "RADNOSTIX INC",
+  "ticker": "INIS",
+  "cik": "0001038277",
+  "title": "8-K — RADNOSTIX INC",
+  "url": "https://www.sec.gov/Archives/edgar/data/1038277/000143774926022282/0001437749-26-022282-index.htm",
+  "published": "2026-07-01T16:08:34-04:00",
+  "detected_at": "2026-07-01T20:09:22.526207+00:00",
+  "items": [
+   "1.01 Entry into a Material Definitive Agreement",
+   "2.01 Completion of Acquisition or Disposition of Assets",
+   "2.03 Creation of a Direct Financial Obligation or an Obligation under an Off-Balance Sheet Arrangement of a Registrant",
+   "3.02 Unregistered Sales of Equity Securities",
+   "9.01 Financial Statements and Exhibits"
+  ],
+  "keywords": [
+   "joint venture"
+  ],
+  "megacaps": [],
+  "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture"
+ }
+]
