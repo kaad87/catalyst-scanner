@@ -16,7 +16,7 @@
   "neg_keywords": [],
   "megacaps": [],
   "score": 2,
-  "tier": "B",
+  "tier": "A",
   "reason": "keywords: strategic partnership",
   "market_cap": null,
   "cap_bucket": null,
@@ -24,9 +24,9 @@
   "price_now": null,
   "price_change_pct": null,
   "price_updated_at": null,
-  "ai_summary": null,
-  "ai_category": null,
-  "ai_materiality": null
+  "ai_summary": "Cognizant indgår et strategisk partnerskab med Domyn for at levere suveræne AI-løsninger i EMEA-området.",
+  "ai_category": "partnership",
+  "ai_materiality": "high"
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074244",
@@ -67,7 +67,7 @@
   "price_at_detect": 31.12,
   "price_now": 31.12,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:00.713122+00:00",
+  "price_updated_at": "2026-07-02T09:53:03.442385+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -106,7 +106,7 @@
   "price_at_detect": 3.99,
   "price_now": 3.99,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:00.986464+00:00",
+  "price_updated_at": "2026-07-02T09:53:03.715243+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -142,7 +142,7 @@
   "price_at_detect": 1.68,
   "price_now": 1.68,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:01.243891+00:00",
+  "price_updated_at": "2026-07-02T09:53:03.966878+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -178,7 +178,7 @@
   "price_at_detect": 7.13,
   "price_now": 7.13,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:01.487757+00:00",
+  "price_updated_at": "2026-07-02T09:53:04.202402+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -221,7 +221,7 @@
   "price_at_detect": 86.19,
   "price_now": 86.19,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:01.812230+00:00",
+  "price_updated_at": "2026-07-02T09:53:04.544626+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -255,7 +255,7 @@
   "price_at_detect": 76.55,
   "price_now": 76.55,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:02.088464+00:00",
+  "price_updated_at": "2026-07-02T09:53:04.873024+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -339,7 +339,7 @@
   "price_at_detect": 354.53,
   "price_now": 354.53,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:02.356070+00:00",
+  "price_updated_at": "2026-07-02T09:53:05.133409+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -373,7 +373,7 @@
   "price_at_detect": 47.88,
   "price_now": 47.88,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:02.643084+00:00",
+  "price_updated_at": "2026-07-02T09:53:05.397411+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -407,7 +407,7 @@
   "price_at_detect": 3.22,
   "price_now": 3.22,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:02.901132+00:00",
+  "price_updated_at": "2026-07-02T09:53:05.640690+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -450,7 +450,7 @@
   "price_at_detect": 16.18,
   "price_now": 16.18,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:03.193134+00:00",
+  "price_updated_at": "2026-07-02T09:53:05.950484+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -493,7 +493,7 @@
   "price_at_detect": 11.97,
   "price_now": 11.97,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:03.435098+00:00",
+  "price_updated_at": "2026-07-02T09:53:06.230682+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -539,7 +539,7 @@
   "price_at_detect": 153.37,
   "price_now": 153.37,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:03.680872+00:00",
+  "price_updated_at": "2026-07-02T09:53:06.489201+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -578,10 +578,10 @@
   "price_at_detect": 171.73,
   "price_now": 171.73,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:03.990436+00:00",
-  "ai_summary": null,
-  "ai_category": null,
-  "ai_materiality": null
+  "price_updated_at": "2026-07-02T09:53:06.825657+00:00",
+  "ai_summary": "GATX Corporation indgår en ændret og genoprettet selskabsaftale med Brookfield Member vedrørende GABX Leasing Holding LLC.",
+  "ai_category": "partnership",
+  "ai_materiality": "medium"
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031561",
@@ -617,7 +617,7 @@
   "price_at_detect": 18.33,
   "price_now": 18.33,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:04.233708+00:00",
+  "price_updated_at": "2026-07-02T09:53:07.115480+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -647,7 +647,7 @@
   "price_at_detect": 0.3064,
   "price_now": 0.3064,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:04.478924+00:00",
+  "price_updated_at": "2026-07-02T09:53:07.349198+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -692,7 +692,7 @@
   "price_at_detect": 146.94,
   "price_now": 146.94,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:04.748376+00:00",
+  "price_updated_at": "2026-07-02T09:53:07.631138+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -730,7 +730,7 @@
   "price_at_detect": 8.5,
   "price_now": 8.5,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:04.990534+00:00",
+  "price_updated_at": "2026-07-02T09:53:07.910889+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -765,7 +765,7 @@
   "price_at_detect": 39.85,
   "price_now": 39.85,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:05.235855+00:00",
+  "price_updated_at": "2026-07-02T09:53:08.189686+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -806,7 +806,7 @@
   "price_at_detect": 18.77,
   "price_now": 18.77,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:05.503882+00:00",
+  "price_updated_at": "2026-07-02T09:53:08.440884+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -830,17 +830,17 @@
   "neg_keywords": [],
   "megacaps": [],
   "score": 3,
-  "tier": "B",
+  "tier": "A",
   "reason": "Item 1.01 (Material Definitive Agreement); keywords: license agreement",
   "market_cap": 1076538873,
   "cap_bucket": "small",
   "price_at_detect": 21.81,
   "price_now": 21.81,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:05.751123+00:00",
-  "ai_summary": null,
-  "ai_category": null,
-  "ai_materiality": null
+  "price_updated_at": "2026-07-02T09:53:08.729493+00:00",
+  "ai_summary": "Jade Biosciences har indgået en licensaftale med Paragon Therapeutics om monospecifikke antistoffer til behandling af sygdomme.",
+  "ai_category": "partnership",
+  "ai_materiality": "high"
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022306",
@@ -871,7 +871,7 @@
   "price_at_detect": 212.71,
   "price_now": 212.71,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:06.046133+00:00",
+  "price_updated_at": "2026-07-02T09:53:09.029625+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -912,7 +912,7 @@
   "price_at_detect": 17.64,
   "price_now": 17.64,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:06.290312+00:00",
+  "price_updated_at": "2026-07-02T09:53:09.309810+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -954,7 +954,7 @@
   "price_at_detect": 82.73,
   "price_now": 82.73,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:06.551287+00:00",
+  "price_updated_at": "2026-07-02T09:53:09.641572+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -989,7 +989,7 @@
   "price_at_detect": 0.084,
   "price_now": 0.084,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:06.804667+00:00",
+  "price_updated_at": "2026-07-02T09:53:09.916734+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
@@ -1028,7 +1028,7 @@
   "price_at_detect": 15.25,
   "price_now": 15.25,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-02T09:52:07.059036+00:00",
+  "price_updated_at": "2026-07-02T09:53:10.160618+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null
