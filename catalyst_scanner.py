@@ -60,21 +60,23 @@ SEC_SHARES_URL = ("https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:0>10}"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
-# Newswire RSS feeds: (source, url, keyword_override). None = the global
-# catalyst KEYWORDS; a list scopes matching to source-specific terms.
-# Failures are logged per feed and never fatal, so a feed that changes its
-# URL just drops out until fixed here. Business Wire deactivated its public
-# RSS channels; DoD's contracts feed died in the defense.gov->war.gov move.
+# Newswire RSS feeds: (source, url, keyword_override, max_age_hours).
+# keyword_override None = the global catalyst KEYWORDS; a list scopes
+# matching to source-specific terms. max_age_hours guards deep-archive
+# feeds against flooding the tape (Google News queries return ~100 items
+# regardless of age). Failures are logged per feed and never fatal.
+# Business Wire deactivated its public RSS channels; DoD's contracts feed
+# died in the defense.gov->war.gov move.
 RSS_FEEDS = [
-    ("GlobeNewswire", "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies", None),
-    ("PR Newswire", "https://www.prnewswire.com/rss/news-releases-list.rss", None),
+    ("GlobeNewswire", "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies", None, 48),
+    ("PR Newswire", "https://www.prnewswire.com/rss/news-releases-list.rss", None, 48),
     # fda.gov blocks datacenter IPs (404 from GitHub runners); Google News
     # carries the same approvals and usually names the company in the title.
     ("FDA", "https://news.google.com/rss/search?q=%22FDA+approves%22+OR+%22FDA+clears%22+OR+%22FDA+authorizes%22+OR+%22FDA+grants%22&hl=en-US&gl=US&ceid=US:en", [
         "approves", "approval", "authorizes", "authorization", "clearance",
         "clears", "breakthrough therapy", "fast track", "priority review",
         "recall",
-    ]),
+    ], 6),
 ]
 
 # Social accounts of market movers: (person, platform, feed_url). Posts are
@@ -682,7 +684,7 @@ def scan_sec_8k(seen, ticker_map, doc_limit):
 
 # ----------------------------------------------------------------- RSS
 
-def scan_rss(source, feed_url, seen, keyword_override=None):
+def scan_rss(source, feed_url, seen, keyword_override=None, max_age_hours=48):
     """Generic newswire RSS scanner; returns list of (hit, text) tuples."""
     results = []
     root = ET.fromstring(http_get(feed_url, browser=True).lstrip())
@@ -698,7 +700,7 @@ def scan_rss(source, feed_url, seen, keyword_override=None):
             continue
         seen[key] = datetime.now(timezone.utc).isoformat()
 
-        if is_stale(item.findtext("pubDate")):
+        if is_stale(item.findtext("pubDate"), max_age_hours):
             continue
         title = (item.findtext("title") or "").strip()
         desc = html_to_text(item.findtext("description") or "")
@@ -822,9 +824,9 @@ def run(doc_limit):
         results += scan_sec_8k(seen, ticker_map, doc_limit)
     except Exception as exc:
         log("error: SEC scan failed (%s)" % exc)
-    for source, feed_url, keyword_override in RSS_FEEDS:
+    for source, feed_url, keyword_override, max_age in RSS_FEEDS:
         try:
-            results += scan_rss(source, feed_url, seen, keyword_override)
+            results += scan_rss(source, feed_url, seen, keyword_override, max_age)
         except Exception as exc:
             log("warning: %s scan failed (%s)" % (source, exc))
     for person, platform, feed_url in SOCIAL_FEEDS:
