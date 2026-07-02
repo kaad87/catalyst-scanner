@@ -28,6 +28,8 @@ jobs:
         env:
           SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
         run: python catalyst_scanner.py
 
       - name: Commit new hits

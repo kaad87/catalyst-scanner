@@ -4,8 +4,14 @@
 Sources:
   * SEC EDGAR live 8-K feed (partnerships/contracts land as Item 1.01,
     press releases as Item 7.01/8.01).
-  * Generic RSS handler for newswires (Business Wire, GlobeNewswire,
-    PR Newswire).
+  * Generic RSS handler for newswires (GlobeNewswire, PR Newswire).
+
+Each hit is scored (positive keywords, megacap co-mentions, Item 1.01;
+financing/dilution terms count against) and tiered A/B/C so the dashboard
+can separate real catalyst candidates from credit-facility noise. Hits are
+enriched with market cap (SEC shares outstanding x Yahoo price) and price
+change since detection, and optionally annotated with a one-line Danish
+summary + category via the OpenAI API.
 
 State lives in data/ as JSON so a GitHub Actions cron can commit new hits
 back to the repo (which triggers a Netlify rebuild of the dashboard).
@@ -13,7 +19,9 @@ back to the repo (which triggers a Netlify rebuild of the dashboard).
 Environment:
   SEC_USER_AGENT  required for live runs, e.g. "MyApp you@example.com".
                   SEC blocks requests without a real contact User-Agent.
-  NTFY_TOPIC      optional; new hits are pushed to https://ntfy.sh/<topic>.
+  NTFY_TOPIC      optional; new A/B-tier hits push to https://ntfy.sh/<topic>.
+  OPENAI_API_KEY  optional; enables AI summaries for A/B-tier hits.
+  OPENAI_MODEL    optional; default gpt-4o-mini.
 
 Usage:
   python3 catalyst_scanner.py             # one scan pass (what the cron runs)
@@ -29,6 +37,7 @@ import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
@@ -45,6 +54,10 @@ SEC_ATOM_URL = (
     "&type=8-K&company=&dateb=&owner=include&count=100&output=atom"
 )
 SEC_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
+SEC_SHARES_URL = ("https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:0>10}"
+                  "/dei/EntityCommonStockSharesOutstanding.json")
+YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
 # Newswire RSS feeds. Failures are logged per feed and never fatal, so a
 # feed that changes its URL just drops out until fixed here. Business Wire
@@ -55,7 +68,9 @@ RSS_FEEDS = [
 ]
 
 # Phrases that mark a catalyst. Matched case-insensitively on word
-# boundaries; bare "agreement"/"partner" alone is too noisy.
+# boundaries. NOTE: "definitive agreement" is deliberately absent — the
+# Item 1.01 heading puts that phrase in every 1.01 filing, including
+# credit facilities; the item flag itself carries that signal.
 KEYWORDS = [
     "strategic partnership",
     "expanded partnership",
@@ -63,8 +78,6 @@ KEYWORDS = [
     "strategic collaboration",
     "collaboration agreement",
     "partnership agreement",
-    "definitive agreement",
-    "material definitive agreement",
     "awarded a contract",
     "awarded contract",
     "contract award",
@@ -81,6 +94,37 @@ KEYWORDS = [
     "purchase order",
 ]
 
+# Contract awards move stocks harder than generic partnerships; weigh up.
+CONTRACT_KEYWORDS = {
+    "awarded a contract", "awarded contract", "contract award",
+    "wins contract", "purchase order",
+}
+
+# Financing/comp/lease terms: the bulk of Item 1.01 noise, often negative
+# (dilution). Each distinct match subtracts from the score.
+NEGATIVE_KEYWORDS = [
+    "credit agreement",
+    "credit facility",
+    "revolving credit",
+    "term loan",
+    "loan agreement",
+    "promissory note",
+    "securities purchase agreement",
+    "note purchase agreement",
+    "subscription agreement",
+    "at-the-market",
+    "equity distribution agreement",
+    "open market sale agreement",
+    "underwriting agreement",
+    "convertible note",
+    "warrant",
+    "indenture",
+    "employment agreement",
+    "separation agreement",
+    "severance",
+    "lease agreement",
+]
+
 # Large partners that make a small-cap catalyst interesting ("samarbejde
 # med store virksomheder"). Co-mentions are recorded on the hit.
 MEGACAPS = [
@@ -93,18 +137,28 @@ MEGACAPS = [
     "Johnson & Johnson", "Exxon", "Chevron", "Shell",
 ]
 
-# 8-K items that are a hit on their own. 1.01 = Entry into a Material
-# Definitive Agreement — where signed partnerships/contracts land.
+# 8-K items that contribute to the score on their own. 1.01 = Entry into
+# a Material Definitive Agreement — where signed partnerships/contracts land.
 HOT_ITEMS = {"1.01"}
+
+TIER_A_MIN = 6   # strong candidate
+TIER_B_MIN = 2   # possible
+CAP_SMALL = 2_000_000_000
+CAP_MID = 10_000_000_000
 
 MAX_HITS_KEPT = 500
 SEEN_MAX_AGE_DAYS = 7
-SEC_REQUEST_DELAY = 0.15  # stay well under SEC's 10 req/s limit
-MAX_DOC_FETCHES = 40      # deep-fetch cap per run
+SEC_REQUEST_DELAY = 0.15   # stay well under SEC's 10 req/s limit
+MAX_DOC_FETCHES = 40       # deep-fetch cap per run
 MAX_NOTIFICATIONS = 10
+MAX_AI_CALLS = 15          # per run; A/B-tier hits only
+PRICE_REFRESH_HOURS = 48   # keep updating price_now for hits this fresh
+MAX_PRICE_REFRESH = 25     # Yahoo lookups per run for the refresh pass
 
 _KEYWORD_RES = [re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I)
                 for k in KEYWORDS]
+_NEGATIVE_RES = [re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I)
+                 for k in NEGATIVE_KEYWORDS]
 _MEGACAP_RES = [(m, re.compile(r"\b" + re.escape(m) + r"\b", re.I)) for m in MEGACAPS]
 _ITEM_RE = re.compile(r"Item\s+(\d+\.\d+)\s*:\s*([^<\n]+)")
 _TAG_RE = re.compile(r"<[^>]+>")
@@ -120,6 +174,11 @@ def log(msg):
 def match_keywords(text):
     """Return the list of catalyst keywords found in text."""
     return [k for k, rx in zip(KEYWORDS, _KEYWORD_RES) if rx.search(text)]
+
+
+def match_negative(text):
+    """Return the list of financing/noise keywords found in text."""
+    return [k for k, rx in zip(NEGATIVE_KEYWORDS, _NEGATIVE_RES) if rx.search(text)]
 
 
 def match_megacaps(text):
@@ -139,15 +198,62 @@ def html_to_text(raw):
     return re.sub(r"\s+", " ", text)
 
 
+# ----------------------------------------------------------------- scoring
+
+def score_hit(keywords, megacaps, item101, negatives):
+    """Score a hit; see module docstring for the rationale."""
+    score = 0
+    for k in keywords[:5]:
+        score += 3 if k in CONTRACT_KEYWORDS else 2
+    if megacaps:
+        score += 3
+    if item101:
+        score += 1
+    score -= 3 * min(len(negatives), 3)
+    return score
+
+
+def tier_for(score):
+    if score >= TIER_A_MIN:
+        return "A"
+    if score >= TIER_B_MIN:
+        return "B"
+    return "C"
+
+
+def cap_bucket(market_cap):
+    if not market_cap:
+        return None
+    if market_cap < CAP_SMALL:
+        return "small"
+    if market_cap < CAP_MID:
+        return "mid"
+    return "large"
+
+
+def adjust_tier_after_ai(hit):
+    """Let the AI classification veto/boost the keyword-based tier."""
+    cat = hit.get("ai_category")
+    if cat in ("financing", "dilution") and hit["tier"] != "C":
+        hit["tier"] = "C"
+        hit["reason"] += "; AI: " + cat
+    elif (cat in ("partnership", "contract_award")
+          and hit.get("ai_materiality") == "high" and hit["tier"] == "B"):
+        hit["tier"] = "A"
+
+
 # ------------------------------------------------------------------- http
 
-def http_get(url, timeout=30):
-    ua = os.environ.get("SEC_USER_AGENT")
-    if not ua:
-        raise RuntimeError(
-            "SEC_USER_AGENT is not set. SEC requires a contact User-Agent, "
-            'e.g. export SEC_USER_AGENT="CatalystScanner you@example.com"'
-        )
+def http_get(url, timeout=30, browser=False):
+    if browser:
+        ua = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+    else:
+        ua = os.environ.get("SEC_USER_AGENT")
+        if not ua:
+            raise RuntimeError(
+                "SEC_USER_AGENT is not set. SEC requires a contact User-Agent, "
+                'e.g. export SEC_USER_AGENT="CatalystScanner you@example.com"'
+            )
     req = urllib.request.Request(url, headers={
         "User-Agent": ua,
         "Accept-Encoding": "identity",
@@ -195,6 +301,140 @@ def load_ticker_map():
         return (cached or {}).get("map", {})
 
 
+# ------------------------------------------------------------- enrichment
+
+def fetch_price(ticker):
+    """Latest price from Yahoo's chart endpoint, or None."""
+    try:
+        url = YAHOO_CHART_URL.format(ticker=urllib.parse.quote(ticker)) + "?range=1d&interval=1d"
+        data = json.loads(http_get(url, timeout=15, browser=True))
+        meta = data["chart"]["result"][0]["meta"]
+        price = meta.get("regularMarketPrice")
+        return float(price) if price else None
+    except Exception:
+        return None
+
+
+def fetch_shares(cik):
+    """Shares outstanding from SEC companyfacts, or None."""
+    try:
+        time.sleep(SEC_REQUEST_DELAY)
+        data = json.loads(http_get(SEC_SHARES_URL.format(cik=cik), timeout=15))
+        facts = []
+        for unit in data.get("units", {}).values():
+            facts.extend(unit)
+        facts = [f for f in facts if f.get("val")]
+        if not facts:
+            return None
+        latest = max(facts, key=lambda f: f.get("end", ""))
+        return int(latest["val"])
+    except Exception:
+        return None
+
+
+def enrich_hit(hit):
+    """Attach market cap and detection price. Fail-soft on every field."""
+    if not hit["ticker"]:
+        return
+    price = fetch_price(hit["ticker"])
+    hit["price_at_detect"] = price
+    hit["price_now"] = price
+    hit["price_change_pct"] = 0.0 if price else None
+    hit["price_updated_at"] = datetime.now(timezone.utc).isoformat()
+    if price and hit.get("cik"):
+        shares = fetch_shares(hit["cik"].lstrip("0") or "0")
+        if shares:
+            hit["market_cap"] = int(price * shares)
+            hit["cap_bucket"] = cap_bucket(hit["market_cap"])
+
+
+def refresh_prices(hits):
+    """Update price_now/price_change_pct on recent hits (the 'am I late?' number)."""
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=PRICE_REFRESH_HOURS)).isoformat()
+    budget = MAX_PRICE_REFRESH
+    updated = 0
+    for hit in hits:
+        if budget <= 0:
+            break
+        if hit["detected_at"] < cutoff or not hit["ticker"] or not hit.get("price_at_detect"):
+            continue
+        price = fetch_price(hit["ticker"])
+        budget -= 1
+        if price:
+            hit["price_now"] = price
+            hit["price_change_pct"] = round(
+                (price - hit["price_at_detect"]) / hit["price_at_detect"] * 100, 2)
+            hit["price_updated_at"] = datetime.now(timezone.utc).isoformat()
+            updated += 1
+        time.sleep(0.2)
+    if updated:
+        log("price refresh: %d hit(s) updated" % updated)
+
+
+# ------------------------------------------------------------ AI annotate
+
+AI_SYSTEM_PROMPT = (
+    "Du er aktieanalytiker. Du får teksten fra en SEC 8-K-filing eller "
+    "pressemeddelelse. Svar KUN med JSON: {\"summary\": \"én kort sætning på "
+    "dansk om hvad aftalen konkret er og med hvem\", \"category\": "
+    "\"partnership|contract_award|financing|dilution|merger|other\", "
+    "\"materiality\": \"high|medium|low\"}. materiality = hvor væsentlig "
+    "aftalen virker for selskabets omsætning. Udvandende finansiering "
+    "(securities purchase, ATM, warrants) er dilution."
+)
+
+
+def parse_ai_response(raw):
+    """Parse the model's JSON reply into the three ai_* fields, or None."""
+    try:
+        content = json.loads(raw)["choices"][0]["message"]["content"]
+        obj = json.loads(content)
+        cat = obj.get("category")
+        mat = obj.get("materiality")
+        summary = str(obj.get("summary", "")).strip()
+        if cat not in ("partnership", "contract_award", "financing",
+                       "dilution", "merger", "other"):
+            cat = "other"
+        if mat not in ("high", "medium", "low"):
+            mat = "low"
+        if not summary:
+            return None
+        return {"ai_summary": summary[:300], "ai_category": cat, "ai_materiality": mat}
+    except (ValueError, KeyError, IndexError, TypeError):
+        return None
+
+
+def ai_annotate(hit, text):
+    """One-line Danish summary + classification via OpenAI. Fail-soft."""
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        return False
+    model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    payload = json.dumps({
+        "model": model,
+        "response_format": {"type": "json_object"},
+        "max_completion_tokens": 200,
+        "messages": [
+            {"role": "system", "content": AI_SYSTEM_PROMPT},
+            {"role": "user", "content": "%s\n\n%s" % (hit["title"], text[:6000])},
+        ],
+    }).encode()
+    try:
+        req = urllib.request.Request(OPENAI_URL, data=payload, headers={
+            "Authorization": "Bearer " + key,
+            "Content-Type": "application/json",
+        })
+        with urllib.request.urlopen(req, timeout=45) as resp:
+            fields = parse_ai_response(resp.read().decode())
+        if fields:
+            hit.update(fields)
+            adjust_tier_after_ai(hit)
+            return True
+    except Exception as exc:
+        log("warning: AI annotation failed for %s (%s)" % (hit["title"][:40], exc))
+    return False
+
+
 # -------------------------------------------------------------- SEC 8-K
 
 def find_primary_doc(index_url):
@@ -218,9 +458,25 @@ def find_primary_doc(index_url):
     return folder + "/" + best[1] if best else None
 
 
+def make_hit(**fields):
+    """Hit skeleton with all enrichment fields present (dashboard-friendly)."""
+    hit = {
+        "id": "", "source": "", "company": "", "ticker": "", "cik": "",
+        "title": "", "url": "", "published": "", "detected_at": "",
+        "items": [], "keywords": [], "neg_keywords": [], "megacaps": [],
+        "score": 0, "tier": "C", "reason": "",
+        "market_cap": None, "cap_bucket": None,
+        "price_at_detect": None, "price_now": None,
+        "price_change_pct": None, "price_updated_at": None,
+        "ai_summary": None, "ai_category": None, "ai_materiality": None,
+    }
+    hit.update(fields)
+    return hit
+
+
 def scan_sec_8k(seen, ticker_map, doc_limit):
-    """Scan EDGAR's live 8-K feed; return list of new hits."""
-    hits = []
+    """Scan EDGAR's live 8-K feed; return list of (hit, doc_text) tuples."""
+    results = []
     ns = {"a": "http://www.w3.org/2005/Atom"}
     feed = ET.fromstring(http_get(SEC_ATOM_URL))
     entries = feed.findall("a:entry", ns)
@@ -245,9 +501,9 @@ def scan_sec_8k(seen, ticker_map, doc_limit):
 
         items = parse_items(summary)
         item_nums = [n for n, _ in items]
-        hot = [n for n in item_nums if n in HOT_ITEMS]
+        item101 = any(n in HOT_ITEMS for n in item_nums)
 
-        keywords, megacaps = [], []
+        keywords, negatives, megacaps, text = [], [], [], ""
         if fetched < doc_limit:
             try:
                 time.sleep(SEC_REQUEST_DELAY)
@@ -256,42 +512,50 @@ def scan_sec_8k(seen, ticker_map, doc_limit):
                     time.sleep(SEC_REQUEST_DELAY)
                     text = html_to_text(http_get(doc_url))[:400_000]
                     keywords = match_keywords(text)
+                    negatives = match_negative(text)
                     megacaps = match_megacaps(text)
                 fetched += 1
             except Exception as exc:
                 log("warning: deep fetch failed for %s (%s)" % (company, exc))
 
-        if not hot and not keywords:
+        if not item101 and not keywords:
             continue
 
+        score = score_hit(keywords, megacaps, item101, negatives)
         reason = []
-        if hot:
+        if item101:
             reason.append("Item 1.01 (Material Definitive Agreement)")
         if keywords:
             reason.append("keywords: " + ", ".join(keywords[:5]))
-        hits.append({
-            "id": entry_id,
-            "source": "SEC 8-K",
-            "company": company,
-            "ticker": ticker,
-            "cik": cik,
-            "title": "%s — %s" % (form, company),
-            "url": url,
-            "published": filed,
-            "detected_at": datetime.now(timezone.utc).isoformat(),
-            "items": ["%s %s" % (n, t) for n, t in items],
-            "keywords": keywords,
-            "megacaps": megacaps,
-            "reason": "; ".join(reason),
-        })
-    return hits
+        if negatives:
+            reason.append("financing terms: " + ", ".join(negatives[:3]))
+        hit = make_hit(
+            id=entry_id,
+            source="SEC 8-K",
+            company=company,
+            ticker=ticker,
+            cik=cik,
+            title="%s — %s" % (form, company),
+            url=url,
+            published=filed,
+            detected_at=datetime.now(timezone.utc).isoformat(),
+            items=["%s %s" % (n, t) for n, t in items],
+            keywords=keywords,
+            neg_keywords=negatives,
+            megacaps=megacaps,
+            score=score,
+            tier=tier_for(score),
+            reason="; ".join(reason),
+        )
+        results.append((hit, text))
+    return results
 
 
 # ----------------------------------------------------------------- RSS
 
 def scan_rss(source, feed_url, seen):
-    """Generic newswire RSS scanner; returns new keyword hits."""
-    hits = []
+    """Generic newswire RSS scanner; returns list of (hit, text) tuples."""
+    results = []
     root = ET.fromstring(http_get(feed_url))
     channel_items = root.findall(".//item")
     log("%s: %d items" % (source, len(channel_items)))
@@ -311,22 +575,28 @@ def scan_rss(source, feed_url, seen):
         keywords = match_keywords(text)
         if not keywords:
             continue
-        hits.append({
-            "id": key,
-            "source": source,
-            "company": "",
-            "ticker": "",
-            "cik": "",
-            "title": title,
-            "url": (item.findtext("link") or "").strip(),
-            "published": (item.findtext("pubDate") or "").strip(),
-            "detected_at": datetime.now(timezone.utc).isoformat(),
-            "items": [],
-            "keywords": keywords,
-            "megacaps": match_megacaps(text),
-            "reason": "keywords: " + ", ".join(keywords[:5]),
-        })
-    return hits
+        negatives = match_negative(text)
+        megacaps = match_megacaps(text)
+        score = score_hit(keywords, megacaps, False, negatives)
+        reason = ["keywords: " + ", ".join(keywords[:5])]
+        if negatives:
+            reason.append("financing terms: " + ", ".join(negatives[:3]))
+        hit = make_hit(
+            id=key,
+            source=source,
+            title=title,
+            url=(item.findtext("link") or "").strip(),
+            published=(item.findtext("pubDate") or "").strip(),
+            detected_at=datetime.now(timezone.utc).isoformat(),
+            keywords=keywords,
+            neg_keywords=negatives,
+            megacaps=megacaps,
+            score=score,
+            tier=tier_for(score),
+            reason="; ".join(reason),
+        )
+        results.append((hit, text))
+    return results
 
 
 # ---------------------------------------------------------------- alerts
@@ -335,14 +605,20 @@ def notify(hits):
     topic = os.environ.get("NTFY_TOPIC")
     if not topic:
         return
-    for hit in hits[:MAX_NOTIFICATIONS]:
+    alertable = [h for h in hits if h["tier"] in ("A", "B")]
+    for hit in alertable[:MAX_NOTIFICATIONS]:
         label = hit["ticker"] or hit["company"] or hit["source"]
-        body = "%s\n%s\n%s" % (hit["title"], hit["reason"], hit["url"])
+        body_lines = ["[%s/%d] %s" % (hit["tier"], hit["score"], hit["title"])]
+        if hit.get("ai_summary"):
+            body_lines.append(hit["ai_summary"])
+        body_lines += [hit["reason"], hit["url"]]
         try:
             req = urllib.request.Request(
                 "https://ntfy.sh/" + topic,
-                data=body.encode(),
-                headers={"Title": "Catalyst: %s" % label, "Tags": "chart_with_upwards_trend"},
+                data="\n".join(body_lines).encode(),
+                headers={"Title": "Catalyst %s: %s" % (hit["tier"], label),
+                         "Tags": "chart_with_upwards_trend",
+                         "Priority": "high" if hit["tier"] == "A" else "default"},
             )
             urllib.request.urlopen(req, timeout=15).read()
         except Exception as exc:
@@ -357,27 +633,39 @@ def run(doc_limit):
     known_ids = {h["id"] for h in hits}
     ticker_map = load_ticker_map()
 
-    new_hits = []
+    results = []
     try:
-        new_hits += scan_sec_8k(seen, ticker_map, doc_limit)
+        results += scan_sec_8k(seen, ticker_map, doc_limit)
     except Exception as exc:
         log("error: SEC scan failed (%s)" % exc)
     for source, feed_url in RSS_FEEDS:
         try:
-            new_hits += scan_rss(source, feed_url, seen)
+            results += scan_rss(source, feed_url, seen)
         except Exception as exc:
             log("warning: %s scan failed (%s)" % (source, exc))
 
-    new_hits = [h for h in new_hits if h["id"] not in known_ids]
+    results = [(h, t) for h, t in results if h["id"] not in known_ids]
+
+    ai_budget = MAX_AI_CALLS
+    for hit, text in results:
+        enrich_hit(hit)
+        if hit["tier"] in ("A", "B") and ai_budget > 0:
+            if ai_annotate(hit, text or hit["title"]):
+                ai_budget -= 1
+
+    new_hits = [h for h, _ in results]
     if new_hits:
         hits = sorted(new_hits + hits, key=lambda h: h["detected_at"], reverse=True)
-        save_json(HITS_FILE, hits[:MAX_HITS_KEPT])
-        notify(new_hits)
+        hits = hits[:MAX_HITS_KEPT]
+    refresh_prices(hits)
+    save_json(HITS_FILE, hits)
     save_json(SEEN_FILE, seen)
+    notify(new_hits)
 
     log("done: %d new hit(s), %d total" % (len(new_hits), len(hits)))
     for hit in new_hits:
-        log("  HIT [%s] %s — %s" % (hit["source"], hit["title"], hit["reason"]))
+        log("  HIT %s/%d [%s] %s — %s" % (hit["tier"], hit["score"],
+                                          hit["source"], hit["title"], hit["reason"]))
     return new_hits
 
 
@@ -397,10 +685,23 @@ with NVIDIA Corporation and was awarded a contract by the U.S. Army.</p>
 </body></html>
 """
 
+SELFTEST_CREDIT_DOC = """
+<p>Item 1.01. Entry into a Material Definitive Agreement. On July 1, 2026
+the Company entered into an amended and restated credit agreement providing
+for a revolving credit facility and a term loan.</p>
+"""
+
+SELFTEST_AI_RESPONSE = json.dumps({
+    "choices": [{"message": {"content": json.dumps({
+        "summary": "3-årig leveringsaftale med Walmart om private label-produkter.",
+        "category": "partnership",
+        "materiality": "high",
+    })}}]
+})
+
 
 def selftest():
     failures = []
-
     checks = [0]
 
     def check(name, cond):
@@ -431,6 +732,38 @@ def selftest():
                            "8-K - Singularity Future Technology Ltd. (0001422892) (Filer)")
     check("feed title parsing", title_match is not None
           and title_match.group(3) == "0001422892")
+
+    # scoring: partnership + megacap + contract award + Item 1.01 = A tier
+    score = score_hit(kw, caps, True, [])
+    check("partnership+megacap scores A", tier_for(score) == "A")
+
+    # scoring: credit facility 8-K = C tier despite Item 1.01
+    credit_text = html_to_text(SELFTEST_CREDIT_DOC)
+    neg = match_negative(credit_text)
+    check("negative: credit terms found", "credit agreement" in neg and "term loan" in neg)
+    credit_score = score_hit(match_keywords(credit_text), [], True, neg)
+    check("credit 8-K scores C", tier_for(credit_score) == "C")
+
+    # scoring: plain partnership without megacap = B tier
+    check("plain partnership scores B",
+          tier_for(score_hit(["partnership agreement"], [], True, [])) == "B")
+
+    check("cap buckets", (cap_bucket(500_000_000), cap_bucket(5_000_000_000),
+                          cap_bucket(50_000_000_000)) == ("small", "mid", "large"))
+
+    fields = parse_ai_response(SELFTEST_AI_RESPONSE)
+    check("AI response parsing", fields is not None
+          and fields["ai_category"] == "partnership"
+          and fields["ai_materiality"] == "high")
+    check("AI response parsing rejects garbage", parse_ai_response("not json") is None)
+
+    # AI veto: financing classification demotes B to C
+    veto_hit = {"tier": "B", "reason": "x", "ai_category": "financing", "ai_materiality": "low"}
+    adjust_tier_after_ai(veto_hit)
+    check("AI financing veto demotes to C", veto_hit["tier"] == "C")
+    boost_hit = {"tier": "B", "reason": "x", "ai_category": "partnership", "ai_materiality": "high"}
+    adjust_tier_after_ai(boost_hit)
+    check("AI high-materiality partnership boosts to A", boost_hit["tier"] == "A")
 
     if failures:
         log("SELFTEST FAILED: %s" % ", ".join(failures))

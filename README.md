@@ -5,6 +5,22 @@ newswire-RSS for partnerskaber, kontrakter og deals — den slags nyheder der
 flytter aktier. Nye hits committes til repoet af en GitHub Actions-cron og
 vises på et statisk "wire tape"-dashboard (Netlify-venligt).
 
+Hits **scores og tieres (A/B/C)** så ægte katalysatorkandidater skilles fra
+Item 1.01-støjen (kreditfaciliteter, leasing, udvandende finansiering):
+
+- **+2** pr. katalysator-keyword ("strategic partnership", "joint venture" …),
+  **+3** for kontrakt-keywords ("awarded a contract", "purchase order" …)
+- **+3** ved megacap-omtale (Nvidia, Walmart, DoD …), **+1** for Item 1.01
+- **−3** pr. finansieringsterm ("credit agreement", "warrant", "at-the-market" …)
+- Tier A ≥ 6, B ≥ 2, resten er C (foldet sammen på dashboardet)
+
+Hvert hit beriges desuden med **market cap** (SEC shares outstanding ×
+Yahoo-kurs; small < $2B < mid < $10B < large) og **kursændring siden
+detektion** — tallet der besvarer "er jeg for sent?". Med en OpenAI-nøgle
+får A/B-hits også en **AI-linje på dansk** (hvad aftalen konkret er +
+kategori), og en finansiering/udvandings-klassifikation kan nedgradere et
+hit til C, mens høj væsentlighed kan løfte B til A.
+
 ## Hvordan det virker
 
 ```
@@ -37,6 +53,10 @@ PR Newswire RSS    ─┘        (cron 15 min)         (commit)       (dashboard
      (scanneren holder sig langt under).
    - `NTFY_TOPIC` *(valgfri)* — et selvvalgt topic-navn; abonnér i
      [ntfy-appen](https://ntfy.sh) på samme topic for push på telefonen.
+     Kun A/B-tier hits notificeres (A med høj prioritet).
+   - `OPENAI_API_KEY` *(valgfri)* — aktiverer AI-opsummeringer af A/B-hits.
+     Model kan overstyres med repo-variablen `OPENAI_MODEL`
+     (default `gpt-4o-mini`; ved 20–50 hits/dag koster det få øre).
 3. Kør workflowet manuelt første gang (*Actions → Catalyst scan → Run
    workflow*) og tjek loggen.
 
