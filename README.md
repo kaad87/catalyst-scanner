@@ -72,7 +72,7 @@ python3 -m http.server 8737                     # åbn http://localhost:8737
 
 - **SEC EDGAR 8-K** (Item 1.01 + keyword-scan af primærdokument)
 - **GlobeNewswire / PR Newswire** (katalysator-keywords)
-- **FDA press releases** (godkendelses-keywords: approves, clearance, recall …)
+- **FDA-godkendelser** via Google News RSS (fda.gov blokerer datacenter-IP'er)
 - **Trump · Truth Social** via trumpstruth.org-arkivets RSS. Poster
   prefiltreres for markedsord/cashtags og AI-gates derefter: kun
   virksomheds-/sektorrelevante poster overlever som A/B (kategorien

@@ -41,6 +41,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -67,7 +68,9 @@ OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 RSS_FEEDS = [
     ("GlobeNewswire", "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies", None),
     ("PR Newswire", "https://www.prnewswire.com/rss/news-releases-list.rss", None),
-    ("FDA", "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml", [
+    # fda.gov blocks datacenter IPs (404 from GitHub runners); Google News
+    # carries the same approvals and usually names the company in the title.
+    ("FDA", "https://news.google.com/rss/search?q=%22FDA+approves%22+OR+%22FDA+clears%22+OR+%22FDA+authorizes%22+OR+%22FDA+grants%22&hl=en-US&gl=US&ceid=US:en", [
         "approves", "approval", "authorizes", "authorization", "clearance",
         "clears", "breakthrough therapy", "fast track", "priority review",
         "recall",
@@ -225,6 +228,21 @@ def match_negative(text):
 def match_megacaps(text):
     """Return the list of megacap partners mentioned in text."""
     return [name for name, rx in _MEGACAP_RES if rx.search(text)]
+
+
+def is_stale(pubdate_str, hours=48):
+    """True if an RSS pubDate is parseable and older than `hours`.
+
+    Guards against first-run floods from feeds with deep archives
+    (e.g. Google News queries return ~100 items regardless of age).
+    """
+    try:
+        dt = parsedate_to_datetime(pubdate_str)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt < datetime.now(timezone.utc) - timedelta(hours=hours)
+    except (TypeError, ValueError):
+        return False
 
 
 def parse_items(summary_html):
@@ -680,6 +698,8 @@ def scan_rss(source, feed_url, seen, keyword_override=None):
             continue
         seen[key] = datetime.now(timezone.utc).isoformat()
 
+        if is_stale(item.findtext("pubDate")):
+            continue
         title = (item.findtext("title") or "").strip()
         desc = html_to_text(item.findtext("description") or "")
         text = title + " " + desc
@@ -735,6 +755,8 @@ def scan_social(person, platform, feed_url, seen):
             continue
         seen[key] = datetime.now(timezone.utc).isoformat()
 
+        if is_stale(item.findtext("pubDate")):
+            continue
         title = html_to_text(item.findtext("title") or "")
         desc = html_to_text(item.findtext("description") or "")
         text = re.sub(r"\s+", " ", (title + " " + desc)).strip()
@@ -972,6 +994,11 @@ def selftest():
 
     check("per-feed keywords", match_keyword_list(
         "FDA approves new drug from Pfizer", ["approves", "recall"]) == ["approves"])
+
+    check("is_stale: old item", is_stale("Mon, 01 Jan 2024 12:00:00 +0000"))
+    check("is_stale: fresh item", not is_stale(
+        datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")))
+    check("is_stale: garbage tolerated", not is_stale("not a date") and not is_stale(None))
 
     if failures:
         log("SELFTEST FAILED: %s" % ", ".join(failures))
