@@ -409,7 +409,7 @@ def ai_annotate(hit, text):
     key = os.environ.get("OPENAI_API_KEY")
     if not key:
         return False
-    model = os.environ.get("OPENAI_MODEL", "gpt-4o-mini")
+    model = os.environ.get("OPENAI_MODEL") or "gpt-4o-mini"  # env can be set-but-empty
     payload = json.dumps({
         "model": model,
         "response_format": {"type": "json_object"},
