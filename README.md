@@ -68,12 +68,44 @@ SEC_USER_AGENT="MitApp min@email.dk" python3 catalyst_scanner.py
 python3 -m http.server 8737                     # åbn http://localhost:8737
 ```
 
-## Udvidelse
+## Kilder
+
+- **SEC EDGAR 8-K** (Item 1.01 + keyword-scan af primærdokument)
+- **GlobeNewswire / PR Newswire** (katalysator-keywords)
+- **FDA press releases** (godkendelses-keywords: approves, clearance, recall …)
+- **Trump · Truth Social** via trumpstruth.org-arkivets RSS. Poster
+  prefiltreres for markedsord/cashtags og AI-gates derefter: kun
+  virksomheds-/sektorrelevante poster overlever som A/B (kategorien
+  `policy` dækker fx toldudmeldinger). Uden OpenAI-nøgle beholdes kun
+  megacap-poster.
+- **Musk/X:** intet gratis feed — X-API'et koster $100+/md., og offentlige
+  nitter-spejle er bot-blokerede. Finder du et virkende spejl, tilføjes det
+  på én linje i `SOCIAL_FEEDS`. Musk-udtalelser fanges indtil da indirekte
+  via newswire-dækning.
 
 Nye kilder følger samme mønster: skriv en `scan_*()`-funktion der returnerer
-hit-dicts (se `scan_rss`), og kald den fra `run()`. Dedup, dashboard og
-alerts samler den automatisk op. Oplagte næste: DoD daily contract awards,
-FDA-godkendelser.
+hit-dicts (se `scan_rss`/`scan_social`), og kald den fra `run()`. Dedup,
+dashboard og alerts samler den automatisk op.
+
+## Opdater-knappen ("⟳ Scan nu")
+
+Knappen kalder `/api/scan` (Netlify Function), som trigger Actions-workflowet
+og dermed en frisk scanning + deploy (~2 min). Den kræver en GitHub-token i
+Netlify-miljøet:
+
+1. Opret en **fine-grained PAT** på
+   https://github.com/settings/personal-access-tokens/new —
+   Repository access: *Only select repositories* → `catalyst-scanner`;
+   Permissions: **Actions: Read and write** (intet andet).
+2. Sæt den i Netlify (indsæt tokenet når `read` venter — så rammer det
+   hverken shell-historik eller skærm):
+   ```bash
+   read -s T && NETLIFY_SITE_ID=31bc4b87-54b1-441f-bfcc-382be036e784 \
+     netlify env:set GITHUB_TOKEN "$T" && unset T
+   ```
+
+Uden token svarer funktionen 501, og knappen viser en fejl — resten af
+dashboardet er upåvirket.
 
 ## Ærlige begrænsninger
 

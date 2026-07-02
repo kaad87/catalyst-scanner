@@ -59,13 +59,37 @@ SEC_SHARES_URL = ("https://data.sec.gov/api/xbrl/companyconcept/CIK{cik:0>10}"
 YAHOO_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 
-# Newswire RSS feeds. Failures are logged per feed and never fatal, so a
-# feed that changes its URL just drops out until fixed here. Business Wire
-# deactivated its public RSS channels; add a working one here if you find it.
+# Newswire RSS feeds: (source, url, keyword_override). None = the global
+# catalyst KEYWORDS; a list scopes matching to source-specific terms.
+# Failures are logged per feed and never fatal, so a feed that changes its
+# URL just drops out until fixed here. Business Wire deactivated its public
+# RSS channels; DoD's contracts feed died in the defense.gov->war.gov move.
 RSS_FEEDS = [
-    ("GlobeNewswire", "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies"),
-    ("PR Newswire", "https://www.prnewswire.com/rss/news-releases-list.rss"),
+    ("GlobeNewswire", "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20about%20Public%20Companies", None),
+    ("PR Newswire", "https://www.prnewswire.com/rss/news-releases-list.rss", None),
+    ("FDA", "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml", [
+        "approves", "approval", "authorizes", "authorization", "clearance",
+        "clears", "breakthrough therapy", "fast track", "priority review",
+        "recall",
+    ]),
 ]
+
+# Social accounts of market movers: (person, platform, feed_url). Posts are
+# prefiltered for market-ish content, then AI-gated so only company-relevant
+# posts survive. X/Twitter has no free feed (mirrors are bot-walled); add a
+# working mirror here if you find one, e.g.
+#   ("Musk", "X", "https://<working-nitter>/elonmusk/rss"),
+SOCIAL_FEEDS = [
+    ("Trump", "Truth Social", "https://trumpstruth.org/feed"),
+]
+
+# Cheap prefilter before spending AI calls on a social post.
+SOCIAL_MARKET_RE = re.compile(
+    r"\$[A-Z]{2,5}\b|\b(tariff|tariffs|stock|stocks|shares|market|markets|"
+    r"merger|acquisition|deal|deals|contract|contracts|trade|company|"
+    r"companies|factory|factories|production|chip|chips|semiconductor|drug|"
+    r"pharma|oil|gas|energy|ipo|earnings|invest|investment|subsid|sanction|"
+    r"sanctions|export|import|bank|banks|crypto|bitcoin)\b", re.I)
 
 # Phrases that mark a catalyst. Matched case-insensitively on word
 # boundaries. NOTE: "definitive agreement" is deliberately absent — the
@@ -152,6 +176,7 @@ SEC_REQUEST_DELAY = 0.15   # stay well under SEC's 10 req/s limit
 MAX_DOC_FETCHES = 40       # deep-fetch cap per run
 MAX_NOTIFICATIONS = 10
 MAX_AI_CALLS = 15          # per run; A/B-tier hits only
+MAX_SOCIAL_AI = 8          # per run; AI relevance gate for social posts
 PRICE_REFRESH_HOURS = 48   # keep updating price_now for hits this fresh
 MAX_PRICE_REFRESH = 25     # Yahoo lookups per run for the refresh pass
 
@@ -170,6 +195,22 @@ def log(msg):
 
 
 # ---------------------------------------------------------------- matching
+
+def compile_keywords(words):
+    return [(k, re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I))
+            for k in words]
+
+
+_KEYWORD_CACHE = {}
+
+
+def match_keyword_list(text, words):
+    """Match text against an arbitrary keyword list (compiled once)."""
+    key = tuple(words)
+    if key not in _KEYWORD_CACHE:
+        _KEYWORD_CACHE[key] = compile_keywords(words)
+    return [k for k, rx in _KEYWORD_CACHE[key] if rx.search(text)]
+
 
 def match_keywords(text):
     """Return the list of catalyst keywords found in text."""
@@ -384,6 +425,21 @@ AI_SYSTEM_PROMPT = (
 )
 
 
+AI_CATEGORIES = ("partnership", "contract_award", "financing", "dilution",
+                 "merger", "policy", "other")
+
+SOCIAL_AI_PROMPT = (
+    "Du er aktieanalytiker. Du får et opslag fra en person der kan flytte "
+    "markedet (fx Trump eller Musk). Vurdér om opslaget er relevant for "
+    "specifikke virksomheder/sektorer på aktiemarkedet. Svar KUN med JSON: "
+    "{\"relevant\": true/false, \"summary\": \"én kort sætning på dansk om "
+    "hvad opslaget betyder for hvilke aktier/sektorer\", \"category\": "
+    "\"partnership|contract_award|financing|dilution|merger|policy|other\", "
+    "\"materiality\": \"high|medium|low\", \"tickers\": [\"TSLA\"]}. "
+    "Politik uden virksomheds-/sektorkonsekvens er ikke relevant."
+)
+
+
 def parse_ai_response(raw):
     """Parse the model's JSON reply into the three ai_* fields, or None."""
     try:
@@ -392,8 +448,7 @@ def parse_ai_response(raw):
         cat = obj.get("category")
         mat = obj.get("materiality")
         summary = str(obj.get("summary", "")).strip()
-        if cat not in ("partnership", "contract_award", "financing",
-                       "dilution", "merger", "other"):
+        if cat not in AI_CATEGORIES:
             cat = "other"
         if mat not in ("high", "medium", "low"):
             mat = "low"
@@ -404,32 +459,72 @@ def parse_ai_response(raw):
         return None
 
 
-def ai_annotate(hit, text):
-    """One-line Danish summary + classification via OpenAI. Fail-soft."""
+def parse_social_response(raw):
+    """Parse the social relevance gate reply: fields + relevant flag, or None."""
+    fields = parse_ai_response(raw)
+    if fields is None:
+        return None
+    try:
+        obj = json.loads(json.loads(raw)["choices"][0]["message"]["content"])
+        fields["relevant"] = bool(obj.get("relevant"))
+        tickers = obj.get("tickers") or []
+        fields["ai_tickers"] = [str(t).upper()[:6] for t in tickers if t][:8]
+        return fields
+    except (ValueError, KeyError, IndexError, TypeError):
+        return None
+
+
+def openai_chat(system_prompt, user_content):
+    """Raw OpenAI chat call; returns the response body or None. Fail-soft."""
     key = os.environ.get("OPENAI_API_KEY")
     if not key:
-        return False
+        return None
     model = os.environ.get("OPENAI_MODEL") or "gpt-4o-mini"  # env can be set-but-empty
     payload = json.dumps({
         "model": model,
         "response_format": {"type": "json_object"},
         "max_completion_tokens": 200,
         "messages": [
-            {"role": "system", "content": AI_SYSTEM_PROMPT},
-            {"role": "user", "content": "%s\n\n%s" % (hit["title"], text[:6000])},
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_content},
         ],
     }).encode()
+    req = urllib.request.Request(OPENAI_URL, data=payload, headers={
+        "Authorization": "Bearer " + key,
+        "Content-Type": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=45) as resp:
+        return resp.read().decode()
+
+
+def ai_annotate(hit, text):
+    """One-line Danish summary + classification via OpenAI. Fail-soft.
+
+    Social hits go through the relevance gate instead: an irrelevant
+    classification demotes the hit to C.
+    """
+    if not os.environ.get("OPENAI_API_KEY"):
+        return False
     try:
-        req = urllib.request.Request(OPENAI_URL, data=payload, headers={
-            "Authorization": "Bearer " + key,
-            "Content-Type": "application/json",
-        })
-        with urllib.request.urlopen(req, timeout=45) as resp:
-            fields = parse_ai_response(resp.read().decode())
-        if fields:
-            hit.update(fields)
-            adjust_tier_after_ai(hit)
-            return True
+        if hit.get("social"):
+            fields = parse_social_response(
+                openai_chat(SOCIAL_AI_PROMPT, "%s\n\n%s" % (hit["title"], text[:6000])))
+            if fields:
+                relevant = fields.pop("relevant")
+                hit.update(fields)
+                if not relevant:
+                    hit["tier"] = "C"
+                    hit["reason"] += "; AI: ikke virksomhedsrelevant"
+                elif fields.get("ai_materiality") == "high":
+                    hit["tier"] = "A"
+                return True
+        else:
+            fields = parse_ai_response(
+                openai_chat(AI_SYSTEM_PROMPT, "%s\n\n%s" % (hit["title"], text[:6000])))
+            if fields:
+                hit.update(fields)
+                adjust_tier_after_ai(hit)
+                return True
     except Exception as exc:
         log("warning: AI annotation failed for %s (%s)" % (hit["title"][:40], exc))
     return False
@@ -484,6 +579,7 @@ def make_hit(**fields):
         "price_at_detect": None, "price_now": None,
         "price_change_pct": None, "price_updated_at": None,
         "ai_summary": None, "ai_category": None, "ai_materiality": None,
+        "ai_tickers": [], "social": False,
     }
     hit.update(fields)
     return hit
@@ -568,10 +664,10 @@ def scan_sec_8k(seen, ticker_map, doc_limit):
 
 # ----------------------------------------------------------------- RSS
 
-def scan_rss(source, feed_url, seen):
+def scan_rss(source, feed_url, seen, keyword_override=None):
     """Generic newswire RSS scanner; returns list of (hit, text) tuples."""
     results = []
-    root = ET.fromstring(http_get(feed_url))
+    root = ET.fromstring(http_get(feed_url, browser=True).lstrip())
     channel_items = root.findall(".//item")
     log("%s: %d items" % (source, len(channel_items)))
 
@@ -587,7 +683,10 @@ def scan_rss(source, feed_url, seen):
         title = (item.findtext("title") or "").strip()
         desc = html_to_text(item.findtext("description") or "")
         text = title + " " + desc
-        keywords = match_keywords(text)
+        if keyword_override is not None:
+            keywords = match_keyword_list(text, keyword_override)
+        else:
+            keywords = match_keywords(text)
         if not keywords:
             continue
         negatives = match_negative(text)
@@ -609,6 +708,54 @@ def scan_rss(source, feed_url, seen):
             score=score,
             tier=tier_for(score),
             reason="; ".join(reason),
+        )
+        results.append((hit, text))
+    return results
+
+
+def scan_social(person, platform, feed_url, seen):
+    """Market-mover social feeds; returns list of (hit, text) tuples.
+
+    Posts pass a cheap market-word prefilter here; run() sends survivors
+    through the AI relevance gate (irrelevant posts are demoted to C, or —
+    without an OpenAI key — only megacap/cashtag posts are kept at all).
+    """
+    results = []
+    source = "%s · %s" % (person, platform)
+    root = ET.fromstring(http_get(feed_url, browser=True).lstrip())
+    channel_items = root.findall(".//item")
+    log("%s: %d posts" % (source, len(channel_items)))
+
+    for item in channel_items:
+        guid = (item.findtext("guid") or item.findtext("link") or "").strip()
+        if not guid:
+            continue
+        key = "social:" + guid
+        if key in seen:
+            continue
+        seen[key] = datetime.now(timezone.utc).isoformat()
+
+        title = html_to_text(item.findtext("title") or "")
+        desc = html_to_text(item.findtext("description") or "")
+        text = re.sub(r"\s+", " ", (title + " " + desc)).strip()
+        text = re.sub(r"^\[No Title\][^|]*?Post from [^|]*?\d{4}", "", text).strip()
+        if len(text) < 25:          # media-only/empty posts
+            continue
+        megacaps = match_megacaps(text)
+        if not megacaps and not SOCIAL_MARKET_RE.search(text):
+            continue
+        hit = make_hit(
+            id=key,
+            source=source,
+            title=text[:180],
+            url=(item.findtext("link") or "").strip(),
+            published=(item.findtext("pubDate") or "").strip(),
+            detected_at=datetime.now(timezone.utc).isoformat(),
+            megacaps=megacaps,
+            score=3 if megacaps else 2,
+            tier="B",
+            reason="markedsrelevant post fra %s" % person,
+            social=True,
         )
         results.append((hit, text))
     return results
@@ -653,18 +800,32 @@ def run(doc_limit):
         results += scan_sec_8k(seen, ticker_map, doc_limit)
     except Exception as exc:
         log("error: SEC scan failed (%s)" % exc)
-    for source, feed_url in RSS_FEEDS:
+    for source, feed_url, keyword_override in RSS_FEEDS:
         try:
-            results += scan_rss(source, feed_url, seen)
+            results += scan_rss(source, feed_url, seen, keyword_override)
         except Exception as exc:
             log("warning: %s scan failed (%s)" % (source, exc))
+    for person, platform, feed_url in SOCIAL_FEEDS:
+        try:
+            results += scan_social(person, platform, feed_url, seen)
+        except Exception as exc:
+            log("warning: %s/%s scan failed (%s)" % (person, platform, exc))
 
     results = [(h, t) for h, t in results if h["id"] not in known_ids]
 
     ai_budget = MAX_AI_CALLS
+    social_budget = MAX_SOCIAL_AI
+    have_key = bool(os.environ.get("OPENAI_API_KEY"))
     for hit, text in results:
         enrich_hit(hit)
-        if hit["tier"] in ("A", "B") and ai_budget > 0:
+        if hit.get("social"):
+            if have_key and social_budget > 0:
+                if ai_annotate(hit, text or hit["title"]):
+                    social_budget -= 1
+            elif not hit["megacaps"]:
+                # no AI gate available: only megacap posts are trustworthy
+                hit["tier"] = "C"
+        elif hit["tier"] in ("A", "B") and ai_budget > 0:
             if ai_annotate(hit, text or hit["title"]):
                 ai_budget -= 1
 
@@ -794,6 +955,23 @@ def selftest():
     boost_hit = {"tier": "B", "reason": "x", "ai_category": "partnership", "ai_materiality": "high"}
     adjust_tier_after_ai(boost_hit)
     check("AI high-materiality partnership boosts to A", boost_hit["tier"] == "A")
+
+    # social prefilter: market words / cashtags pass, chit-chat doesn't
+    check("social prefilter: tariffs", bool(SOCIAL_MARKET_RE.search("Big TARIFFS on foreign cars!")))
+    check("social prefilter: cashtag", bool(SOCIAL_MARKET_RE.search("Buying more $TSLA today")))
+    check("social prefilter: chit-chat rejected",
+          not SOCIAL_MARKET_RE.search("Happy birthday to a great American!"))
+
+    social_raw = json.dumps({"choices": [{"message": {"content": json.dumps({
+        "relevant": True, "summary": "Toldsatser på biler rammer europæiske producenter.",
+        "category": "policy", "materiality": "medium", "tickers": ["gm", "F"],
+    })}}]})
+    sf = parse_social_response(social_raw)
+    check("social AI parsing", sf is not None and sf["relevant"]
+          and sf["ai_category"] == "policy" and sf["ai_tickers"] == ["GM", "F"])
+
+    check("per-feed keywords", match_keyword_list(
+        "FDA approves new drug from Pfizer", ["approves", "recall"]) == ["approves"])
 
     if failures:
         log("SELFTEST FAILED: %s" % ", ".join(failures))
