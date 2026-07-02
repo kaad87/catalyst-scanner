@@ -435,6 +435,21 @@ def ai_annotate(hit, text):
     return False
 
 
+def refetch_text(hit):
+    """Re-fetch source text for an existing hit (used by AI backfill)."""
+    try:
+        if hit["source"] == "SEC 8-K":
+            doc = find_primary_doc(hit["url"])
+            if doc:
+                time.sleep(SEC_REQUEST_DELAY)
+                return html_to_text(http_get(doc))[:400_000]
+        elif hit["url"]:
+            return html_to_text(http_get(hit["url"], browser=True))[:400_000]
+    except Exception as exc:
+        log("warning: text refetch failed for %s (%s)" % (hit["title"][:40], exc))
+    return ""
+
+
 # -------------------------------------------------------------- SEC 8-K
 
 def find_primary_doc(index_url):
@@ -657,6 +672,21 @@ def run(doc_limit):
     if new_hits:
         hits = sorted(new_hits + hits, key=lambda h: h["detected_at"], reverse=True)
         hits = hits[:MAX_HITS_KEPT]
+
+    # Spend leftover AI budget on recent A/B hits still missing annotation
+    # (self-healing backfill: covers runs where the key was absent/exhausted).
+    if ai_budget > 0 and os.environ.get("OPENAI_API_KEY"):
+        cutoff = (datetime.now(timezone.utc)
+                  - timedelta(hours=PRICE_REFRESH_HOURS)).isoformat()
+        for hit in hits:
+            if ai_budget <= 0:
+                break
+            if (hit["detected_at"] < cutoff or hit["tier"] not in ("A", "B")
+                    or hit.get("ai_summary")):
+                continue
+            if ai_annotate(hit, refetch_text(hit) or hit["title"]):
+                ai_budget -= 1
+                log("AI backfill: %s" % hit["title"][:60])
     refresh_prices(hits)
     save_json(HITS_FILE, hits)
     save_json(SEEN_FILE, seen)
