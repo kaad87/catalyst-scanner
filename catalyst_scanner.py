@@ -797,14 +797,21 @@ def notify(hits):
         body_lines = ["[%s/%d] %s" % (hit["tier"], hit["score"], hit["title"])]
         if hit.get("ai_summary"):
             body_lines.append(hit["ai_summary"])
-        body_lines += [hit["reason"], hit["url"]]
+        body_lines.append(hit["reason"])
+        # A + high materiality = act fast: 'urgent' repeats vibration in the
+        # ntfy app until seen. Tapping the notification opens the filing.
+        if hit["tier"] == "A":
+            priority = "urgent" if hit.get("ai_materiality") == "high" else "high"
+        else:
+            priority = "default"
         try:
             req = urllib.request.Request(
                 "https://ntfy.sh/" + topic,
                 data="\n".join(body_lines).encode(),
                 headers={"Title": "Catalyst %s: %s" % (hit["tier"], label),
-                         "Tags": "chart_with_upwards_trend",
-                         "Priority": "high" if hit["tier"] == "A" else "default"},
+                         "Tags": "rotating_light" if priority == "urgent" else "chart_with_upwards_trend",
+                         "Priority": priority,
+                         "Click": hit["url"] or "https://catalyst-tape.netlify.app"},
             )
             urllib.request.urlopen(req, timeout=15).read()
         except Exception as exc:
