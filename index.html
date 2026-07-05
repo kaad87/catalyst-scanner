@@ -47,9 +47,10 @@
   /* ---------- header ---------- */
   header {
     position: sticky; top: 0; z-index: 10;
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    background: rgba(7, 9, 13, .72);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    background: rgba(9, 12, 17, .92);
     border-bottom: 1px solid var(--border);
+    transform: translateZ(0); /* own compositing layer — avoids blur-repaint flicker */
   }
   .header-inner {
     max-width: 1060px; margin: 0 auto; padding: 14px 24px;
@@ -66,7 +67,8 @@
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--aurora);
     box-shadow: 0 0 12px var(--aurora), 0 0 26px rgba(61,223,164,.5);
-    animation: pulse 2.4s ease-in-out infinite;
+    /* no animation here: an infinitely animating element inside a
+       backdrop-filtered sticky header forces constant blur repaints */
   }
   @keyframes pulse { 50% { opacity: .45; } }
   .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: .4px; }
