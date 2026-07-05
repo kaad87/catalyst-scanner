@@ -36,6 +36,9 @@
   h1 .blink { color: var(--hot); animation: pulse 1.6s infinite; }
   @keyframes pulse { 50% { opacity: .25; } }
   #meta { color: var(--dim); font-size: 12px; }
+  #scanstatus { color: var(--dim); font-size: 12px; }
+  #scanstatus.ok { color: var(--up); }
+  #scanstatus.bad { color: var(--down); }
   .controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
   label.toggle { color: var(--dim); font-size: 12px; cursor: pointer; user-select: none; }
   #filter {
@@ -124,6 +127,7 @@
 <header>
   <h1><span class="blink">●</span> CATALYST TAPE</h1>
   <span id="meta">loading…</span>
+  <span id="scanstatus"></span>
   <div class="controls">
     <label class="toggle"><input type="checkbox" id="hideLarge" checked> skjul large caps</label>
     <input id="filter" placeholder="filter: ticker, keyword…">
@@ -268,9 +272,30 @@ refreshBtn.addEventListener("click", async () => {
   }
 });
 
+const scanStatus = document.getElementById("scanstatus");
+async function loadStatus() {
+  try {
+    const res = await fetch("/api/status");
+    if (!res.ok) { scanStatus.textContent = ""; return; }
+    const s = await res.json();
+    if (s.status !== "completed") {
+      scanStatus.textContent = "· scanner kører nu…";
+      scanStatus.className = "ok";
+    } else if (s.conclusion !== "success") {
+      scanStatus.textContent = "· seneste scan FEJLEDE";
+      scanStatus.className = "bad";
+    } else {
+      scanStatus.textContent = "· sidste scan for " + ago(s.last_run) + " siden";
+      scanStatus.className = "";
+    }
+  } catch { scanStatus.textContent = ""; }
+}
+
 filterBox.addEventListener("input", render);
 hideLarge.addEventListener("change", render);
 load();
+loadStatus();
+setInterval(loadStatus, 60000);
 setInterval(load, 60000);
 setInterval(render, 30000); // ages/heat tick over without refetch
 </script>
