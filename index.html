@@ -149,6 +149,34 @@
     border: 1px dashed var(--border); border-radius: var(--radius);
   }
 
+  /* ---------- track record ---------- */
+  #track { margin-bottom: 20px; }
+  #track > summary {
+    list-style: none; cursor: pointer; font-size: 12px; font-weight: 700;
+    letter-spacing: 1.6px; text-transform: uppercase; color: var(--dim);
+    padding: 4px 0;
+  }
+  #track > summary::before { content: "▸ "; }
+  #track[open] > summary::before { content: "▾ "; }
+  .track-grid {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-top: 8px;
+    overflow-x: auto;
+  }
+  .track-grid table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  .track-grid th {
+    text-align: right; font-size: 10.5px; letter-spacing: .8px; text-transform: uppercase;
+    color: var(--faint); font-weight: 600; padding: 4px 10px; border-bottom: 1px solid var(--border);
+  }
+  .track-grid th:first-child, .track-grid td:first-child { text-align: left; }
+  .track-grid td { padding: 7px 10px; font: 500 13px var(--mono); font-variant-numeric: tabular-nums; }
+  .track-grid td.pos { color: var(--aurora); }
+  .track-grid td.neg { color: var(--red); }
+  .track-note { margin-top: 8px; font-size: 11.5px; color: var(--faint); }
+  #healthline { color: var(--faint); }
+  #healthline.bad { color: var(--amber); }
+  #tokenwarn { color: var(--red); font-weight: 600; }
+
   /* ---------- cards ---------- */
   .hit {
     display: block; text-decoration: none; color: inherit; position: relative;
@@ -191,6 +219,7 @@
   .chg { font: 700 12.5px var(--mono); }
   .chg.up { color: var(--aurora); }
   .chg.down { color: var(--red); }
+  .vol { font: 700 12px var(--mono); color: var(--amber); }
   .age { font: 500 12px var(--mono); color: var(--faint); }
   .ext { color: var(--faint); font-size: 13px; opacity: 0; transition: opacity .15s; }
   .hit:hover .ext { opacity: 1; }
@@ -271,6 +300,11 @@
     <button class="kpi" id="kpiScanBtn" title="Seneste scanning"><b id="kpiScan">–</b><span>Sidste scan</span></button>
   </div>
 
+  <details id="track">
+    <summary>Track record — hvad er signalerne værd?</summary>
+    <div class="track-grid" id="trackGrid"></div>
+  </details>
+
   <div class="toolbar">
     <input id="filter" type="search" placeholder="Søg ticker, selskab, keyword…  ( / )">
     <span class="chip-sep"></span>
@@ -285,7 +319,9 @@
 </main>
 
 <footer>
-  <span>SEC EDGAR 8-K · GlobeNewswire · PR Newswire · FDA · Truth Social</span>
+  <span>SEC 8-K · Form 4 · GlobeNewswire · PR Newswire · FDA · Truth Social</span>
+  <span id="healthline"></span>
+  <span id="tokenwarn"></span>
   <span>Research, ikke investeringsrådgivning</span>
 </footer>
 
@@ -367,6 +403,8 @@ function hitCard(h) {
     ? `<span class="chg ${chg >= 0 ? "up" : "down"}">${chg >= 0 ? "+" : ""}${chg.toFixed(1)}%</span>` : "";
   const capHtml = h.market_cap
     ? `<span class="mcap">${fmtCap(h.market_cap)}${h.cap_bucket === "small" ? ' <span class="small-tag">small</span>' : ""}</span>` : "";
+  const volHtml = (h.volume_ratio || 0) >= 1.5
+    ? `<span class="vol" title="Dagens volumen vs. normalt — markedet reagerer">⚡${h.volume_ratio.toFixed(1)}×</span>` : "";
   const aiHtml = h.ai_summary
     ? `<div class="ai"><span class="cat ${CAT_CLS[h.ai_category] || "meh"}">${CAT_LABEL[h.ai_category] || esc(h.ai_category)}</span><span>${esc(h.ai_summary)}</span></div>` : "";
   const metaBits = [];
@@ -378,7 +416,7 @@ function hitCard(h) {
       ${h.ticker ? `<span class="ticker">${esc(h.ticker)}</span>` : ""}
       ${(h.ai_tickers || []).map(t => `<span class="ticker">${esc(t)}</span>`).join("")}
       <span class="src ${srcClass(h)}">${esc(h.source)}</span>
-      <span class="badges">${capHtml}${chgHtml}<span class="age" title="${esc(absTime(h.detected_at))}">${ago(h.detected_at)}</span><span class="ext">↗</span></span>
+      <span class="badges">${capHtml}${volHtml}${chgHtml}<span class="age" title="${esc(absTime(h.detected_at))}">${ago(h.detected_at)}</span><span class="ext">↗</span></span>
     </div>
     ${leadFor(h)}
     ${aiHtml}
@@ -412,6 +450,61 @@ function render() {
   tape.innerHTML = out || `<div id="empty"><b>Ingen hits matcher</b>Justér filtre eller søgning — tapen fyldes automatisk, når scanneren finder nye katalysatorer.</div>`;
 }
 
+function pct(from, to) { return from && to ? (to - from) / from * 100 : null; }
+function fmtPct(v) {
+  return v === null ? "–" : (v >= 0 ? "+" : "") + v.toFixed(1).replace(".", ",") + "%";
+}
+function avg(list) {
+  const xs = list.filter(x => x !== null);
+  return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+}
+
+function renderTrack() {
+  const grid = document.getElementById("trackGrid");
+  const tiers = ["A", "B"].map(t => {
+    const rows = hits.filter(h => h.tier === t && h.price_at_detect);
+    const r1h = rows.map(h => pct(h.price_at_detect, h.price_1h));
+    const r1d = rows.map(h => pct(h.price_at_detect, h.price_1d));
+    const r3d = rows.map(h => pct(h.price_at_detect, h.price_3d || h.price_now));
+    const settled = r1d.filter(x => x !== null);
+    const hitrate = settled.length ? settled.filter(x => x > 0).length / settled.length * 100 : null;
+    // paper portfolio: $1.000 pr. signal ved detektionskursen
+    const pnl = r3d.filter(x => x !== null).reduce((a, x) => a + 1000 * x / 100, 0);
+    return { t, n: rows.length, a1h: avg(r1h), a1d: avg(r1d), a3d: avg(r3d), hitrate, pnl, settled: settled.length };
+  });
+  const cls = v => v === null ? "" : v >= 0 ? "pos" : "neg";
+  grid.innerHTML = `<table>
+    <tr><th>Tier</th><th>Signaler</th><th>Hit-rate 1d</th><th>Gns. 1t</th><th>Gns. 1d</th><th>Gns. 3d</th><th>Papir-P&L ($1.000/signal)</th></tr>
+    ${tiers.map(x => `<tr>
+      <td>${x.t}</td><td>${x.n}</td>
+      <td>${x.hitrate === null ? "–" : Math.round(x.hitrate) + "% (" + x.settled + ")"}</td>
+      <td class="${cls(x.a1h)}">${fmtPct(x.a1h)}</td>
+      <td class="${cls(x.a1d)}">${fmtPct(x.a1d)}</td>
+      <td class="${cls(x.a3d)}">${fmtPct(x.a3d)}</td>
+      <td class="${cls(x.pnl)}">${x.pnl >= 0 ? "+" : ""}$${Math.round(x.pnl)}</td>
+    </tr>`).join("")}
+  </table>
+  <div class="track-note">Kurssnapshots tages 1 t / 1 dag / 3 dage efter detektion (ca. — cron-takten sætter opløsningen). Hit-rate = andel med positiv kurs efter 1 dag. Tallene bliver først meningsfulde efter et par ugers data.</div>`;
+}
+
+async function loadHealth() {
+  const el = document.getElementById("healthline");
+  try {
+    const res = await fetch("data/health.json?t=" + Date.now());
+    if (!res.ok) { el.textContent = ""; return; }
+    const health = await res.json();
+    const stale = Object.entries(health).filter(([, v]) =>
+      v.last_ok && Date.now() - new Date(v.last_ok) > 24 * 3600e3);
+    if (stale.length) {
+      el.textContent = "⚠︎ nede: " + stale.map(([k]) => k).join(", ");
+      el.className = "bad";
+    } else {
+      el.textContent = "alle kilder OK";
+      el.className = "";
+    }
+  } catch { el.textContent = ""; }
+}
+
 function updateKpis() {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   document.getElementById("kpiToday").textContent = hits.filter(h => new Date(h.detected_at) >= today).length;
@@ -427,6 +520,7 @@ async function load() {
     hits.sort((a, b) => b.detected_at.localeCompare(a.detected_at));
     meta.textContent = "opdateret " + new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
     updateKpis();
+    renderTrack();
     render();
   } catch {
     meta.textContent = "kunne ikke hente data";
@@ -448,6 +542,11 @@ async function loadStatus() {
     } else {
       scanStatus.textContent = "· sidste scan for " + ago(s.last_run) + " siden"; scanStatus.className = "";
       kpiScan.textContent = ago(s.last_run); kpiScan.className = "";
+    }
+    const warn = document.getElementById("tokenwarn");
+    if (s.token_expires) {
+      const days = Math.floor((new Date(s.token_expires.replace(" UTC", "Z").replace(" ", "T")) - Date.now()) / 86400e3);
+      warn.textContent = days <= 7 ? `⚠︎ GitHub-token udløber om ${days} dag${days === 1 ? "" : "e"} — forny den, ellers dør scan-knappen` : "";
     }
   } catch { scanStatus.textContent = ""; kpiScan.textContent = "–"; }
 }
@@ -519,8 +618,10 @@ refreshBtn.addEventListener("click", async () => {
 syncChips();
 load();
 loadStatus();
+loadHealth();
 setInterval(load, 60000);
 setInterval(loadStatus, 60000);
+setInterval(loadHealth, 300000);
 setInterval(render, 30000); // heat/age ticks over without refetch
 </script>
 </body>

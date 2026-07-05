@@ -27,6 +27,9 @@ export default async () => {
       last_run: run.run_started_at || run.created_at,
       status: run.status,          // queued | in_progress | completed
       conclusion: run.conclusion,  // success | failure | ... (null while running)
+      // GitHub echoes the PAT's expiry on every call — lets the dashboard
+      // warn before the scan button dies.
+      token_expires: res.headers.get("github-authentication-token-expiration"),
     },
     { headers: { "Cache-Control": "public, max-age=30" } });
 };

@@ -49,6 +49,7 @@ DATA_DIR = BASE_DIR / "data"
 HITS_FILE = DATA_DIR / "hits.json"
 SEEN_FILE = DATA_DIR / "seen.json"
 TICKERS_FILE = DATA_DIR / "tickers.json"
+HEALTH_FILE = DATA_DIR / "health.json"
 
 SEC_ATOM_URL = (
     "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
@@ -182,8 +183,10 @@ MAX_DOC_FETCHES = 40       # deep-fetch cap per run
 MAX_NOTIFICATIONS = 10
 MAX_AI_CALLS = 15          # per run; A/B-tier hits only
 MAX_SOCIAL_AI = 8          # per run; AI relevance gate for social posts
-PRICE_REFRESH_HOURS = 48   # keep updating price_now for hits this fresh
-MAX_PRICE_REFRESH = 25     # Yahoo lookups per run for the refresh pass
+PRICE_REFRESH_HOURS = 80   # keep updating price_now for hits this fresh (covers 3d snapshot)
+MAX_PRICE_REFRESH = 30     # Yahoo lookups per run for the refresh pass
+MAX_FORM4_FETCHES = 25     # Form 4 deep-fetch cap per run
+MIN_INSIDER_BUY = 100_000  # USD; open-market buys below this are ignored
 
 _KEYWORD_RES = [re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I)
                 for k in KEYWORDS]
@@ -364,16 +367,32 @@ def load_ticker_map():
 
 # ------------------------------------------------------------- enrichment
 
-def fetch_price(ticker):
-    """Latest price from Yahoo's chart endpoint, or None."""
+def fetch_quote(ticker):
+    """(price, volume_ratio) from one Yahoo chart call, or (None, None).
+
+    volume_ratio = today's volume vs. the average of the prior sessions —
+    already-at-1.5x intraday means the market is reacting to something.
+    """
     try:
-        url = YAHOO_CHART_URL.format(ticker=urllib.parse.quote(ticker)) + "?range=1d&interval=1d"
+        url = YAHOO_CHART_URL.format(ticker=urllib.parse.quote(ticker)) + "?range=10d&interval=1d"
         data = json.loads(http_get(url, timeout=15, browser=True))
-        meta = data["chart"]["result"][0]["meta"]
-        price = meta.get("regularMarketPrice")
-        return float(price) if price else None
+        result = data["chart"]["result"][0]
+        price = result["meta"].get("regularMarketPrice")
+        price = float(price) if price else None
+        ratio = None
+        vols = [v for v in (result.get("indicators", {}).get("quote", [{}])[0]
+                            .get("volume") or []) if v]
+        if len(vols) >= 4:
+            baseline = sum(vols[:-1]) / len(vols[:-1])
+            if baseline > 0:
+                ratio = round(vols[-1] / baseline, 1)
+        return price, ratio
     except Exception:
-        return None
+        return None, None
+
+
+def fetch_price(ticker):
+    return fetch_quote(ticker)[0]
 
 
 def fetch_shares(cik):
@@ -394,14 +413,15 @@ def fetch_shares(cik):
 
 
 def enrich_hit(hit):
-    """Attach market cap and detection price. Fail-soft on every field."""
+    """Attach market cap, detection price and volume ratio. Fail-soft."""
     if not hit["ticker"]:
         return
-    price = fetch_price(hit["ticker"])
+    price, ratio = fetch_quote(hit["ticker"])
     hit["price_at_detect"] = price
     hit["price_now"] = price
     hit["price_change_pct"] = 0.0 if price else None
     hit["price_updated_at"] = datetime.now(timezone.utc).isoformat()
+    hit["volume_ratio"] = ratio
     if price and hit.get("cik"):
         shares = fetch_shares(hit["cik"].lstrip("0") or "0")
         if shares:
@@ -409,27 +429,44 @@ def enrich_hit(hit):
             hit["cap_bucket"] = cap_bucket(hit["market_cap"])
 
 
+# Outcome snapshots for the track record: (field, hours after detection).
+SNAPSHOTS = [("price_1h", 1), ("price_1d", 24), ("price_3d", 72)]
+SNAPSHOT_MAX_LATE_DAYS = 14  # fill late (weekend gaps) rather than never
+
+
+def due_snapshots(hit, now):
+    """Snapshot fields that are due but not yet filled for this hit."""
+    age_h = (now - datetime.fromisoformat(hit["detected_at"])).total_seconds() / 3600
+    if age_h > SNAPSHOT_MAX_LATE_DAYS * 24:
+        return []
+    return [f for f, hrs in SNAPSHOTS if hit.get(f) is None and age_h >= hrs]
+
+
 def refresh_prices(hits):
-    """Update price_now/price_change_pct on recent hits (the 'am I late?' number)."""
-    cutoff = (datetime.now(timezone.utc) - timedelta(hours=PRICE_REFRESH_HOURS)).isoformat()
-    budget = MAX_PRICE_REFRESH
-    updated = 0
-    for hit in hits:
-        if budget <= 0:
-            break
-        if hit["detected_at"] < cutoff or not hit["ticker"] or not hit.get("price_at_detect"):
-            continue
-        price = fetch_price(hit["ticker"])
-        budget -= 1
+    """Update live prices and fill due outcome snapshots (track record)."""
+    now = datetime.now(timezone.utc)
+    cutoff = (now - timedelta(hours=PRICE_REFRESH_HOURS)).isoformat()
+    trackable = [h for h in hits if h["ticker"] and h.get("price_at_detect")]
+    # hits with due snapshots first — that data is lost if we skip it long enough
+    queue = [h for h in trackable if due_snapshots(h, now)]
+    queue += [h for h in trackable if h["detected_at"] >= cutoff and h not in queue]
+    updated = snapped = 0
+    for hit in queue[:MAX_PRICE_REFRESH]:
+        price, ratio = fetch_quote(hit["ticker"])
         if price:
             hit["price_now"] = price
             hit["price_change_pct"] = round(
                 (price - hit["price_at_detect"]) / hit["price_at_detect"] * 100, 2)
-            hit["price_updated_at"] = datetime.now(timezone.utc).isoformat()
+            hit["price_updated_at"] = now.isoformat()
+            if ratio and hit["detected_at"] >= (now - timedelta(hours=24)).isoformat():
+                hit["volume_ratio"] = max(ratio, hit.get("volume_ratio") or 0)
+            for field in due_snapshots(hit, now):
+                hit[field] = price
+                snapped += 1
             updated += 1
         time.sleep(0.2)
     if updated:
-        log("price refresh: %d hit(s) updated" % updated)
+        log("price refresh: %d hit(s), %d snapshot(s)" % (updated, snapped))
 
 
 # ------------------------------------------------------------ AI annotate
@@ -598,6 +635,8 @@ def make_hit(**fields):
         "market_cap": None, "cap_bucket": None,
         "price_at_detect": None, "price_now": None,
         "price_change_pct": None, "price_updated_at": None,
+        "price_1h": None, "price_1d": None, "price_3d": None,
+        "volume_ratio": None,
         "ai_summary": None, "ai_category": None, "ai_materiality": None,
         "ai_tickers": [], "social": False,
     }
@@ -679,6 +718,125 @@ def scan_sec_8k(seen, ticker_map, doc_limit):
             reason="; ".join(reason),
         )
         results.append((hit, text))
+    return results
+
+
+SEC_FORM4_ATOM_URL = (
+    "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
+    "&type=4&company=&dateb=&owner=include&count=100&output=atom"
+)
+
+
+def parse_form4(xml_text):
+    """Extract open-market insider buys from a Form 4 ownershipDocument.
+
+    Returns {ticker, owner, role, total_usd, shares} summing transactions
+    with code P (open-market purchase) + acquired flag A, or None.
+    """
+    try:
+        root = ET.fromstring(xml_text)
+        total_usd = total_shares = 0.0
+        for tx in root.iter("nonDerivativeTransaction"):
+            code = tx.findtext(".//transactionCode", "")
+            acq = tx.findtext(".//transactionAcquiredDisposedCode/value", "")
+            if code != "P" or acq != "A":
+                continue
+            shares = float(tx.findtext(".//transactionShares/value", "0") or 0)
+            price = float(tx.findtext(".//transactionPricePerShare/value", "0") or 0)
+            total_usd += shares * price
+            total_shares += shares
+        if total_usd <= 0:
+            return None
+        owner = root.findtext(".//reportingOwnerId/rptOwnerName", "").strip()
+        rel = root.find(".//reportingOwnerRelationship")
+        role = ""
+        if rel is not None:
+            title = (rel.findtext("officerTitle") or "").strip()
+            if title:
+                role = title
+            elif (rel.findtext("isDirector") or "").strip() in ("1", "true"):
+                role = "Director"
+            elif (rel.findtext("isTenPercentOwner") or "").strip() in ("1", "true"):
+                role = "10%-ejer"
+        return {
+            "ticker": (root.findtext(".//issuerTradingSymbol") or "").strip(),
+            "owner": owner,
+            "role": role,
+            "total_usd": int(total_usd),
+            "shares": int(total_shares),
+        }
+    except ET.ParseError:
+        return None
+
+
+def find_form4_xml(index_url):
+    """URL of the ownershipDocument XML in a Form 4 filing folder, or None."""
+    folder = index_url.rsplit("/", 1)[0]
+    listing = json.loads(http_get(folder + "/index.json"))
+    for item in listing.get("directory", {}).get("item", []):
+        name = item.get("name", "")
+        if name.lower().endswith(".xml") and "index" not in name.lower():
+            return folder + "/" + name
+    return None
+
+
+def scan_sec_form4(seen, ticker_map, fetch_limit=MAX_FORM4_FETCHES):
+    """Scan EDGAR's live Form 4 feed for significant open-market insider buys."""
+    results = []
+    feed = ET.fromstring(http_get(SEC_FORM4_ATOM_URL))
+    ns = {"a": "http://www.w3.org/2005/Atom"}
+    entries = [e for e in feed.findall("a:entry", ns)
+               if "(Issuer)" in e.findtext("a:title", "", ns)]
+    log("SEC Form 4 feed: %d issuer entries" % len(entries))
+    fetched = 0
+
+    for entry in entries:
+        entry_id = entry.findtext("a:id", "", ns) + ":f4"
+        if entry_id in seen:
+            continue
+        seen[entry_id] = datetime.now(timezone.utc).isoformat()
+        if fetched >= fetch_limit:
+            continue  # marked seen; peak-hour overflow is skipped, not queued
+
+        title = entry.findtext("a:title", "", ns)
+        link_el = entry.find("a:link", ns)
+        url = link_el.get("href") if link_el is not None else ""
+        m = re.match(r"4(?:/A)? - (.+?) \((\d+)\)", title)
+        company, cik = m.groups() if m else (title, "")
+
+        try:
+            time.sleep(SEC_REQUEST_DELAY)
+            xml_url = find_form4_xml(url)
+            if not xml_url:
+                continue
+            time.sleep(SEC_REQUEST_DELAY)
+            buy = parse_form4(http_get(xml_url))
+            fetched += 1
+        except Exception as exc:
+            log("warning: Form 4 fetch failed for %s (%s)" % (company, exc))
+            continue
+        if not buy or buy["total_usd"] < MIN_INSIDER_BUY:
+            continue
+
+        score = 6 if buy["total_usd"] >= 250_000 else 4
+        who = buy["owner"] + (" (%s)" % buy["role"] if buy["role"] else "")
+        reason = "Insider-køb: %s købte for $%s i det åbne marked" % (
+            who, "{:,.0f}".format(buy["total_usd"]).replace(",", "."))
+        hit = make_hit(
+            id=entry_id,
+            source="SEC Form 4",
+            company=company,
+            ticker=buy["ticker"] or ticker_map.get(cik.lstrip("0"), ""),
+            cik=cik,
+            title="Form 4 — %s" % company,
+            url=url,
+            published=entry.findtext("a:updated", "", ns),
+            detected_at=datetime.now(timezone.utc).isoformat(),
+            score=score,
+            tier=tier_for(score),
+            reason=reason,
+        )
+        results.append((hit, ""))
     return results
 
 
@@ -798,6 +956,8 @@ def notify(hits):
         if hit.get("ai_summary"):
             body_lines.append(hit["ai_summary"])
         body_lines.append(hit["reason"])
+        if (hit.get("volume_ratio") or 0) >= 1.5:
+            body_lines.append("⚡ Volumen %.1f× normalt — markedet reagerer" % hit["volume_ratio"])
         # A + high materiality = act fast: 'urgent' repeats vibration in the
         # ntfy app until seen. Tapping the notification opens the filing.
         if hit["tier"] == "A":
@@ -818,6 +978,51 @@ def notify(hits):
             log("warning: ntfy failed (%s)" % exc)
 
 
+# -------------------------------------------------------------- watchdog
+
+WATCHDOG_STALE_HOURS = 24
+
+
+def update_health(health, source, error=None):
+    """Record a source's scan outcome in the health map."""
+    now = datetime.now(timezone.utc).isoformat()
+    entry = health.setdefault(source, {})
+    if error is None:
+        entry["last_ok"] = now
+        entry.pop("last_error", None)
+        entry.pop("error", None)
+    else:
+        entry["last_error"] = now
+        entry["error"] = str(error)[:200]
+
+
+def check_watchdog(health):
+    """ntfy an admin warning for sources that have been down for 24h+."""
+    topic = os.environ.get("NTFY_TOPIC")
+    now = datetime.now(timezone.utc)
+    stale_cutoff = (now - timedelta(hours=WATCHDOG_STALE_HOURS)).isoformat()
+    for source, entry in health.items():
+        last_ok = entry.get("last_ok")
+        if not last_ok or last_ok >= stale_cutoff:
+            continue  # healthy, or never worked (config issue, not an outage)
+        if entry.get("last_alerted", "") >= stale_cutoff:
+            continue  # already alerted within the window
+        entry["last_alerted"] = now.isoformat()
+        log("WATCHDOG: %s has been down since %s" % (source, last_ok[:16]))
+        if not topic:
+            continue
+        try:
+            req = urllib.request.Request(
+                "https://ntfy.sh/" + topic,
+                data=("Kilden '%s' har fejlet i over %d timer.\nSeneste fejl: %s"
+                      % (source, WATCHDOG_STALE_HOURS, entry.get("error", "?"))).encode(),
+                headers={"Title": "Watchdog: %s er nede" % source, "Tags": "warning"},
+            )
+            urllib.request.urlopen(req, timeout=15).read()
+        except Exception as exc:
+            log("warning: watchdog ntfy failed (%s)" % exc)
+
+
 # ------------------------------------------------------------------ main
 
 def run(doc_limit):
@@ -825,22 +1030,35 @@ def run(doc_limit):
     hits = load_json(HITS_FILE, [])
     known_ids = {h["id"] for h in hits}
     ticker_map = load_ticker_map()
+    health = load_json(HEALTH_FILE, {})
 
     results = []
     try:
         results += scan_sec_8k(seen, ticker_map, doc_limit)
+        update_health(health, "SEC 8-K")
     except Exception as exc:
         log("error: SEC scan failed (%s)" % exc)
+        update_health(health, "SEC 8-K", exc)
+    try:
+        results += scan_sec_form4(seen, ticker_map)
+        update_health(health, "SEC Form 4")
+    except Exception as exc:
+        log("warning: Form 4 scan failed (%s)" % exc)
+        update_health(health, "SEC Form 4", exc)
     for source, feed_url, keyword_override, max_age in RSS_FEEDS:
         try:
             results += scan_rss(source, feed_url, seen, keyword_override, max_age)
+            update_health(health, source)
         except Exception as exc:
             log("warning: %s scan failed (%s)" % (source, exc))
+            update_health(health, source, exc)
     for person, platform, feed_url in SOCIAL_FEEDS:
         try:
             results += scan_social(person, platform, feed_url, seen)
+            update_health(health, "%s · %s" % (person, platform))
         except Exception as exc:
             log("warning: %s/%s scan failed (%s)" % (person, platform, exc))
+            update_health(health, "%s · %s" % (person, platform), exc)
 
     results = [(h, t) for h, t in results if h["id"] not in known_ids]
 
@@ -849,6 +1067,8 @@ def run(doc_limit):
     have_key = bool(os.environ.get("OPENAI_API_KEY"))
     for hit, text in results:
         enrich_hit(hit)
+        if hit["source"] == "SEC Form 4":
+            continue  # reason is already self-explanatory; save AI budget
         if hit.get("social"):
             if have_key and social_budget > 0:
                 if ai_annotate(hit, text or hit["title"]):
@@ -864,6 +1084,8 @@ def run(doc_limit):
     if new_hits:
         hits = sorted(new_hits + hits, key=lambda h: h["detected_at"], reverse=True)
         hits = hits[:MAX_HITS_KEPT]
+    check_watchdog(health)
+    save_json(HEALTH_FILE, health)
 
     # Spend leftover AI budget on recent A/B hits still missing annotation
     # (self-healing backfill: covers runs where the key was absent/exhausted).
@@ -912,6 +1134,43 @@ SELFTEST_CREDIT_DOC = """
 the Company entered into an amended and restated credit agreement providing
 for a revolving credit facility and a term loan.</p>
 """
+
+SELFTEST_FORM4 = """<?xml version="1.0"?>
+<ownershipDocument>
+  <issuer><issuerCik>0001509745</issuerCik><issuerName>CYPHERPUNK</issuerName>
+    <issuerTradingSymbol>CYPH</issuerTradingSymbol></issuer>
+  <reportingOwner>
+    <reportingOwnerId><rptOwnerName>Doe Jane</rptOwnerName></reportingOwnerId>
+    <reportingOwnerRelationship><isDirector>1</isDirector><isOfficer>1</isOfficer>
+      <officerTitle>Chief Executive Officer</officerTitle></reportingOwnerRelationship>
+  </reportingOwner>
+  <nonDerivativeTable>
+    <nonDerivativeTransaction>
+      <transactionCoding><transactionCode>P</transactionCode></transactionCoding>
+      <transactionAmounts>
+        <transactionShares><value>50000</value></transactionShares>
+        <transactionPricePerShare><value>2.00</value></transactionPricePerShare>
+        <transactionAcquiredDisposedCode><value>A</value></transactionAcquiredDisposedCode>
+      </transactionAmounts>
+    </nonDerivativeTransaction>
+    <nonDerivativeTransaction>
+      <transactionCoding><transactionCode>P</transactionCode></transactionCoding>
+      <transactionAmounts>
+        <transactionShares><value>25000</value></transactionShares>
+        <transactionPricePerShare><value>2.00</value></transactionPricePerShare>
+        <transactionAcquiredDisposedCode><value>A</value></transactionAcquiredDisposedCode>
+      </transactionAmounts>
+    </nonDerivativeTransaction>
+    <nonDerivativeTransaction>
+      <transactionCoding><transactionCode>F</transactionCode></transactionCoding>
+      <transactionAmounts>
+        <transactionShares><value>99999</value></transactionShares>
+        <transactionPricePerShare><value>2.00</value></transactionPricePerShare>
+        <transactionAcquiredDisposedCode><value>D</value></transactionAcquiredDisposedCode>
+      </transactionAmounts>
+    </nonDerivativeTransaction>
+  </nonDerivativeTable>
+</ownershipDocument>"""
 
 SELFTEST_AI_RESPONSE = json.dumps({
     "choices": [{"message": {"content": json.dumps({
@@ -1008,6 +1267,37 @@ def selftest():
     check("is_stale: fresh item", not is_stale(
         datetime.now(timezone.utc).strftime("%a, %d %b %Y %H:%M:%S +0000")))
     check("is_stale: garbage tolerated", not is_stale("not a date") and not is_stale(None))
+
+    # Form 4: open-market buy summed, sales/awards ignored
+    buy = parse_form4(SELFTEST_FORM4)
+    check("form4: buy parsed", buy is not None and buy["ticker"] == "CYPH"
+          and buy["total_usd"] == 150_000 and buy["owner"] == "Doe Jane")
+    check("form4: role from officerTitle", buy["role"] == "Chief Executive Officer")
+    check("form4: sale-only returns None",
+          parse_form4(SELFTEST_FORM4.replace(">P<", ">S<")) is None)
+    check("form4: garbage tolerated", parse_form4("<not-xml") is None)
+
+    # snapshots: due fields depend on age
+    now = datetime.now(timezone.utc)
+    young = {"detected_at": (now - timedelta(hours=2)).isoformat(), "price_1h": None,
+             "price_1d": None, "price_3d": None}
+    check("snapshots: 1h due at 2h", due_snapshots(young, now) == ["price_1h"])
+    old_hit = {"detected_at": (now - timedelta(hours=75)).isoformat(), "price_1h": 1.0,
+               "price_1d": 1.0, "price_3d": None}
+    check("snapshots: 3d due at 75h", due_snapshots(old_hit, now) == ["price_3d"])
+    ancient = {"detected_at": (now - timedelta(days=20)).isoformat(), "price_1h": None,
+               "price_1d": None, "price_3d": None}
+    check("snapshots: too late is skipped", due_snapshots(ancient, now) == [])
+
+    # watchdog: stale source flagged once, healthy source untouched
+    health = {"FDA": {"last_ok": (now - timedelta(hours=30)).isoformat(), "error": "503"},
+              "SEC 8-K": {"last_ok": now.isoformat()}}
+    check_watchdog(health)
+    check("watchdog: stale source alerted", "last_alerted" in health["FDA"])
+    check("watchdog: healthy source untouched", "last_alerted" not in health["SEC 8-K"])
+    alerted_at = health["FDA"]["last_alerted"]
+    check_watchdog(health)
+    check("watchdog: no re-alert within window", health["FDA"]["last_alerted"] == alerted_at)
 
     if failures:
         log("SELFTEST FAILED: %s" % ", ".join(failures))

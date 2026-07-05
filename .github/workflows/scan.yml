@@ -2,9 +2,10 @@ name: Catalyst scan
 
 on:
   schedule:
-    # Every 15 min on weekdays, 12:00-22:45 UTC — covers US premarket,
+    # Every 5 min on weekdays, 12:00-22:55 UTC — covers US premarket,
     # market hours and the after-hours window where 8-Ks cluster.
-    - cron: "*/15 12-22 * * 1-5"
+    # (Public repo = unlimited Actions minutes.)
+    - cron: "*/5 12-22 * * 1-5"
     # Hourly on weekends — no 8-K filings, but Trump/FDA/newswires
     # keep moving and can gap Monday's open.
     - cron: "0 * * * 0,6"
