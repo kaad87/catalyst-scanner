@@ -1,5 +1,36 @@
 [
  {
+  "id": "rss:CBMioAFBVV95cUxPb0YzMklLM0p2NV9PVjhtQm8yUnRGNXRxRjRnOTktT0g5RnRSa082bHJNczlTNVBvalkyOFVfdXFEOEUxekVqeUtzRXZVZmVSbFZDa0hUbFltUk5NSjlwZ1N1M3Y4NUFMM21Xcm1XdFRBbHJFQnc1cU9PaE5BQ3FIQkRuT0RlWVUtcFdkcDRoSlZPZFh4UVJBRlh4Q3o3TjZL",
+  "source": "FDA",
+  "company": "",
+  "ticker": "",
+  "cik": "",
+  "title": "FDA Grants Priority Review for Dolutegravir in Newborns With HIV - Contagion Live",
+  "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPb0YzMklLM0p2NV9PVjhtQm8yUnRGNXRxRjRnOTktT0g5RnRSa082bHJNczlTNVBvalkyOFVfdXFEOEUxekVqeUtzRXZVZmVSbFZDa0hUbFltUk5NSjlwZ1N1M3Y4NUFMM21Xcm1XdFRBbHJFQnc1cU9PaE5BQ3FIQkRuT0RlWVUtcFdkcDRoSlZPZFh4UVJBRlh4Q3o3TjZL?oc=5",
+  "published": "Sun, 05 Jul 2026 10:46:10 GMT",
+  "detected_at": "2026-07-05T15:16:58.435228+00:00",
+  "items": [],
+  "keywords": [
+   "priority review"
+  ],
+  "neg_keywords": [],
+  "megacaps": [],
+  "score": 2,
+  "tier": "B",
+  "reason": "keywords: priority review",
+  "market_cap": null,
+  "cap_bucket": null,
+  "price_at_detect": null,
+  "price_now": null,
+  "price_change_pct": null,
+  "price_updated_at": null,
+  "ai_summary": "FDA har givet prioriteret vurdering til Dolutegravir til nyfødte med HIV.",
+  "ai_category": "other",
+  "ai_materiality": "medium",
+  "ai_tickers": [],
+  "social": false
+ },
+ {
   "id": "social:https://trumpstruth.org/statuses/39678",
   "source": "Trump · Truth Social",
   "company": "",
