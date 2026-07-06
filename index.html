@@ -372,6 +372,9 @@ function fmtCap(mc) {
 function esc(s) {
   return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
+function safeUrl(u) {
+  return /^https?:\/\//i.test(u || "") ? u : "#";  // feeds must not smuggle javascript: URLs
+}
 const CAT_LABEL = { partnership: "partnerskab", contract_award: "kontrakt",
   financing: "finansiering", dilution: "udvanding", merger: "M&A",
   policy: "politik", other: "andet" };
@@ -410,7 +413,7 @@ function hitCard(h) {
   const metaBits = [];
   if (!h.social && h.reason) metaBits.push(esc(h.reason));
   if (h.megacaps?.length) metaBits.push(`<span class="caps">⚡ ${esc(h.megacaps.join(", "))}</span>`);
-  return `<a class="hit t${h.tier} ${heat}" href="${esc(h.url)}" target="_blank" rel="noopener">
+  return `<a class="hit t${h.tier} ${heat}" href="${esc(safeUrl(h.url))}" target="_blank" rel="noopener">
     <div class="row1">
       ${heat === "hot" ? `<span class="fresh">NY</span>` : ""}
       ${h.ticker ? `<span class="ticker">${esc(h.ticker)}</span>` : ""}

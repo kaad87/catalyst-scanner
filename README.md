@@ -24,10 +24,12 @@ hit til C, mens høj væsentlighed kan løfte B til A.
 ## Hvordan det virker
 
 ```
-SEC EDGAR 8-K feed ─┐
-GlobeNewswire RSS  ─┼─> catalyst_scanner.py ─> data/hits.json ─> index.html
-PR Newswire RSS    ─┘        (cron 15 min)         (commit)       (dashboard)
-                                  └────────> ntfy.sh push (valgfri)
+SEC EDGAR 8-K     ─┐
+SEC Form 4        ─┤
+GlobeNewswire/PRN ─┼─> catalyst_scanner.py ─> data/hits.json ─> index.html
+FDA (Google News) ─┤    (cron 5 min hverdage,      (commit)       (dashboard)
+Truth Social      ─┘     hver time weekend)
+                             └────────> ntfy.sh push (valgfri)
 ```
 
 - **`catalyst_scanner.py`** — tailer EDGAR's `getcurrent` 8-K-atom-feed.
@@ -37,9 +39,13 @@ PR Newswire RSS    ─┘        (cron 15 min)         (commit)       (dashboard
   dokumentet og scannes for keywords ("strategic partnership", "awarded a
   contract", "joint venture" …) samt megacap-partnere (Nvidia, Microsoft,
   DoD …). Generisk RSS-handler dækker pressebureauerne.
-- **`.github/workflows/scan.yml`** — kører hvert 15. min på hverdage
-  (12–23 UTC ≈ US pre-market til after-hours) og committer nye hits, hvilket
-  trigger Netlify-rebuild.
+- **`.github/workflows/scan.yml`** — kører hvert 5. min på hverdage
+  (12–23 UTC ≈ US pre-market til after-hours) og hver time i weekenden;
+  committer nye hits, hvilket trigger Netlify-rebuild. Hvert hit får
+  kurssnapshots 1 t/1 dag/3 dage efter detektion (med gyldighedsvinduer)
+  til dashboardets track record-panel, plus volumen-ratio (⚡ ≥1,5×
+  normalt = markedet reagerer). Watchdog ntfy'er, hvis en kilde har
+  fejlet i 24+ timer.
 - **`index.html`** — statisk tape, nyeste først. Hits under 30 min gløder
   signalgult og køler af med alderen (30 min → 3 t → 24 t → stale).
 
@@ -71,6 +77,7 @@ python3 -m http.server 8737                     # åbn http://localhost:8737
 ## Kilder
 
 - **SEC EDGAR 8-K** (Item 1.01 + keyword-scan af primærdokument)
+- **SEC Form 4** — insider-køb i det åbne marked ≥ $100k (≥ $250k = Tier A)
 - **GlobeNewswire / PR Newswire** (katalysator-keywords)
 - **FDA-godkendelser** via Google News RSS (fda.gov blokerer datacenter-IP'er)
 - **Trump · Truth Social** via trumpstruth.org-arkivets RSS. Poster
@@ -114,8 +121,10 @@ dashboardet er upåvirket.
   hale: small/mid-caps hvis 8-K ingen kigger på i realtid.
 - Business Wire har nedlagt sine offentlige RSS-feeds; tilføj selv et
   fungerende feed i `RSS_FEEDS` hvis du finder ét.
-- 8-K'er dukker op i feedet 1–3 min efter accept — men cron'en kører kun
-  hvert 15. min (GitHub Actions' reelle minimum).
+- 8-K'er dukker op i feedet 1–3 min efter accept; cron'en kører hvert
+  5. min på hverdage (offentligt repo = ubegrænsede Actions-minutter).
+- Form 4-feedet er højvolumen; deep-fetches cappes pr. kørsel, så køb kan
+  overses i spidsbelastning.
 
 **Dette er research, ikke investeringsrådgivning.** Partnerskabsnyheder er
 berygtede for "buy the rumor, sell the news".

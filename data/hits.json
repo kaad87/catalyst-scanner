@@ -1,5 +1,42 @@
 [
  {
+  "id": "rss:https://www.prnewswire.com/news-releases/fgr-to-launch-puregraph-cem-into-china-302817869.html",
+  "source": "PR Newswire",
+  "company": "",
+  "ticker": "",
+  "cik": "",
+  "title": "FGR to launch PureGRAPH® CEM into China",
+  "url": "https://www.prnewswire.com/news-releases/fgr-to-launch-puregraph-cem-into-china-302817869.html",
+  "published": "Mon, 6 Jul 2026 00:00:00 +0000",
+  "detected_at": "2026-07-06T01:34:53.441651+00:00",
+  "items": [],
+  "keywords": [
+   "distribution agreement",
+   "joint venture",
+   "memorandum of understanding"
+  ],
+  "neg_keywords": [],
+  "megacaps": [],
+  "score": 6,
+  "tier": "A",
+  "reason": "keywords: distribution agreement, joint venture, memorandum of understanding",
+  "market_cap": null,
+  "cap_bucket": null,
+  "price_at_detect": null,
+  "price_now": null,
+  "price_change_pct": null,
+  "price_updated_at": null,
+  "price_1h": null,
+  "price_1d": null,
+  "price_3d": null,
+  "volume_ratio": null,
+  "ai_summary": null,
+  "ai_category": null,
+  "ai_materiality": null,
+  "ai_tickers": [],
+  "social": false
+ },
+ {
   "id": "social:https://trumpstruth.org/statuses/39761",
   "source": "Trump · Truth Social",
   "company": "",
@@ -375,14 +412,15 @@
   "price_at_detect": 44.93,
   "price_now": 44.93,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 44.93
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031970",
@@ -415,14 +453,15 @@
   "price_at_detect": 5.98,
   "price_now": 5.98,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 5.98
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031971",
@@ -452,14 +491,15 @@
   "price_at_detect": 1.1,
   "price_now": 1.1,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": "Beeline Holdings, Inc. indgår en aftale med MagicBlocks, Inc. om at overtage deres aktier og ombytte SAFEs for Beeline-aktier.",
   "ai_category": "merger",
   "ai_materiality": "high",
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 1.1
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080436",
@@ -493,14 +533,15 @@
   "price_at_detect": 37.97,
   "price_now": 37.97,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 37.97
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001398344-26-011663",
@@ -530,14 +571,15 @@
   "price_at_detect": 12.85,
   "price_now": 12.85,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": "Bluerock Private Real Estate Fund har indgået en administrativ serviceaftale med Bluerock Fund Advisor, LLC.",
   "ai_category": "partnership",
   "ai_materiality": "medium",
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 12.85
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001683168-26-005262",
@@ -568,14 +610,15 @@
   "price_at_detect": 0.33,
   "price_now": 0.33,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.33
  },
  {
   "id": "rss:CBMivgFBVV95cUxQTUlFUmlNR01Xc3NudlFZM2I2ZEJadnNjLU9aQ1ZITDdlaXJfbjRRMzR4elpCZmRmcEQwdE1xTHZTZV85RlZ5cWJhRlV3RDZCMmF5aF8zMjl0QmdTX0dyTVJUQy0ydUk0dUxOeExmYmRGTGVuMmc4UU4tWERVNERfOG5vTWZCcTdsbXo3V0lMNjc0U1QwYmVjeU5GeEhlYzRvcW1OWUZ1aHViSjl2cXI4ZkdVMFB5NEFyMDAwVGxn",
@@ -700,14 +743,15 @@
   "price_at_detect": 24.97,
   "price_now": 24.97,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 24.97
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001683168-26-005251",
@@ -734,14 +778,15 @@
   "price_at_detect": 1.99,
   "price_now": 1.99,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 1.99
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075013",
@@ -772,14 +817,15 @@
   "price_at_detect": 1.89,
   "price_now": 1.89,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 1.89
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031917",
@@ -807,14 +853,15 @@
   "price_at_detect": 0.47,
   "price_now": 0.47,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.47
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031919",
@@ -844,14 +891,15 @@
   "price_at_detect": 0.5833,
   "price_now": 0.5833,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.5833
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080362",
@@ -913,14 +961,15 @@
   "price_at_detect": 0.32,
   "price_now": 0.32,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.32
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001948056-26-000058",
@@ -983,14 +1032,15 @@
   "price_at_detect": 245.97,
   "price_now": 245.97,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 245.97
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001831481-26-000092",
@@ -1032,14 +1082,15 @@
   "price_at_detect": 4.25,
   "price_now": 4.25,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 4.25
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-294837",
@@ -1073,14 +1124,15 @@
   "price_at_detect": 15.11,
   "price_now": 15.11,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 15.11
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031949",
@@ -1115,14 +1167,15 @@
   "price_at_detect": 1.9,
   "price_now": 1.9,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 1.9
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031946",
@@ -1151,14 +1204,15 @@
   "price_at_detect": 3.85,
   "price_now": 3.85,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": "Q/C Technologies, Inc. opsiger sin teknologi licensaftale med LightSolver Ltd. for at fokusere på udviklingen af optiske computerteknologier til AI.",
   "ai_category": "other",
   "ai_materiality": "medium",
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 3.85
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001140361-26-027463",
@@ -1192,14 +1246,15 @@
   "price_at_detect": 49.59,
   "price_now": 49.59,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 49.59
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080408",
@@ -1234,14 +1289,15 @@
   "price_at_detect": 20.3,
   "price_now": 20.3,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 20.3
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022557",
@@ -1270,14 +1326,15 @@
   "price_at_detect": 56.62,
   "price_now": 56.62,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": "AXT indgår en Master Development and Supply Agreement med Coherent om levering af indium phosphide wafer substrater.",
   "ai_category": "partnership",
   "ai_materiality": "high",
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 56.62
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031954",
@@ -1310,14 +1367,15 @@
   "price_at_detect": 0.31,
   "price_now": 0.31,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.31
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075082",
@@ -1355,14 +1413,15 @@
   "price_at_detect": 0.8151,
   "price_now": 0.8151,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.8151
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022576",
@@ -1399,14 +1458,15 @@
   "price_at_detect": 327.87,
   "price_now": 327.87,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 327.87
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-294943",
@@ -1443,14 +1503,15 @@
   "price_at_detect": 1.93,
   "price_now": 1.93,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 1.93
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075086",
@@ -1487,14 +1548,15 @@
   "price_at_detect": 6.55,
   "price_now": 6.55,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 6.55
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075090",
@@ -1524,14 +1586,15 @@
   "price_at_detect": 0.282,
   "price_now": 0.282,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 0.282
  },
  {
   "id": "rss:CBMi2AFBVV95cUxOU2tDSGtHR2llT3o2VnJYWDdEV3VrNGxtTHFOc2Y3VjVzMnRIb2RUNEdqa2dnZlVjeG45ZWFTQlBlbHpmVVQ4UU14dkI2T2l0dndBN3k2bGo0WHNFWDI4N3RHWEphYzNSTzZZck9yT0N0Q3k5SmFtMGRxWEZ1UmgxcTNQX0J0N290NEMzZGcyNU5DMzk1dHMyOG5hR1hybkNmNjJ1QjFkYng5SmRTUmQ4ZFVCSDZSY29CaE10Z2VTY181X000cy1lSHJWV2QtUC1FelkydnhIV1Q",
@@ -1593,14 +1656,15 @@
   "price_at_detect": 2.625,
   "price_now": 2.64,
   "price_change_pct": 0.57,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
   "price_1h": null,
-  "price_1d": null
+  "price_1d": null,
+  "price_3d": 2.64
  },
  {
   "id": "social:https://trumpstruth.org/statuses/39668",
@@ -1689,7 +1753,7 @@
   "price_at_detect": 14.75,
   "price_now": 14.67,
   "price_change_pct": -0.54,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
@@ -1724,7 +1788,7 @@
   "price_at_detect": 160.6,
   "price_now": 162.13,
   "price_change_pct": 0.95,
-  "price_updated_at": "2026-07-05T23:05:20.224155+00:00",
+  "price_updated_at": "2026-07-06T01:34:54.312123+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
@@ -4390,16 +4454,16 @@
   "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture; financing terms: indenture",
   "market_cap": 1921499,
   "cap_bucket": "small",
-  "price_at_detect": 0.0353,
+  "price_at_detect": 0.6693,
   "price_now": 0.6693,
-  "price_change_pct": 1796.03,
+  "price_change_pct": 0.0,
   "price_updated_at": "2026-07-05T21:07:31.863641+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
-  "price_1h": 0.6693,
-  "price_1d": 0.6693,
-  "price_3d": 0.6693
+  "price_1h": null,
+  "price_1d": null,
+  "price_3d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292834",
@@ -4466,16 +4530,16 @@
   "reason": "Item 1.01 (Material Definitive Agreement); keywords: joint venture, letter of intent, purchase order; financing terms: credit agreement, revolving credit, promissory note",
   "market_cap": 1766592824,
   "cap_bucket": "small",
-  "price_at_detect": 25.33,
+  "price_at_detect": 104.47,
   "price_now": 104.47,
-  "price_change_pct": 312.44,
+  "price_change_pct": 0.0,
   "price_updated_at": "2026-07-05T21:07:31.863641+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
-  "price_1h": 104.47,
-  "price_1d": 104.47,
-  "price_3d": 104.47
+  "price_1h": null,
+  "price_1d": null,
+  "price_3d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074421",
