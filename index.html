@@ -516,25 +516,33 @@ function updateKpis() {
 }
 
 /* ---------- data ---------- */
+let lastGoodLoad = null;
 async function load() {
   try {
     const res = await fetch("data/hits.json?t=" + Date.now());
+    if (!res.ok) throw new Error(res.status);
     hits = await res.json();
     hits.sort((a, b) => b.detected_at.localeCompare(a.detected_at));
-    meta.textContent = "opdateret " + new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
+    lastGoodLoad = new Date().toLocaleTimeString("da-DK", { hour: "2-digit", minute: "2-digit" });
+    meta.textContent = "opdateret " + lastGoodLoad;
     updateKpis();
     renderTrack();
     render();
   } catch {
-    meta.textContent = "kunne ikke hente data";
+    // one failed poll must not scare the user away from perfectly good data
+    meta.textContent = lastGoodLoad
+      ? "opdateret " + lastGoodLoad + " · genforsøger…"
+      : "kunne ikke hente data — genforsøger…";
   }
 }
 
+let statusEverLoaded = false;
 async function loadStatus() {
   const kpiScan = document.getElementById("kpiScan");
   try {
     const res = await fetch("/api/status");
-    if (!res.ok) { scanStatus.textContent = ""; kpiScan.textContent = "–"; return; }
+    if (!res.ok) throw new Error(res.status);
+    statusEverLoaded = true;
     const s = await res.json();
     if (s.status !== "completed") {
       scanStatus.textContent = "· scanner kører…"; scanStatus.className = "ok";
@@ -551,7 +559,11 @@ async function loadStatus() {
       const days = Math.floor((new Date(s.token_expires.replace(" UTC", "Z").replace(" ", "T")) - Date.now()) / 86400e3);
       warn.textContent = days <= 7 ? `⚠︎ GitHub-token udløber om ${days} dag${days === 1 ? "" : "e"} — forny den, ellers dør scan-knappen` : "";
     }
-  } catch { scanStatus.textContent = ""; kpiScan.textContent = "–"; }
+  } catch {
+    // keep the last known status on transient failures; only show "–"
+    // if we never managed to load it at all
+    if (!statusEverLoaded) { scanStatus.textContent = ""; kpiScan.textContent = "–"; }
+  }
 }
 
 /* ---------- interactions ---------- */

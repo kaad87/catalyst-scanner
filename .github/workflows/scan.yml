@@ -34,15 +34,28 @@ jobs:
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ vars.OPENAI_MODEL }}
-        run: python catalyst_scanner.py
+        run: python catalyst_scanner.py | tee scan.log
 
       - name: Commit new hits
+        # Every commit triggers a Netlify deploy, and free build minutes are
+        # finite — so commit immediately when there are NEW hits (ntfy has
+        # already fired regardless), but batch price/snapshot-only updates
+        # to at most one commit per hour.
         run: |
           git config user.name "catalyst-bot"
           git config user.email "actions@users.noreply.github.com"
           git add data/
-          if ! git diff --cached --quiet; then
+          if git diff --cached --quiet; then
+            echo "ingen ændringer"
+            exit 0
+          fi
+          NEW=$(grep -c "] *HIT" scan.log || true)
+          LAST=$(git log -1 --format=%ct -- data/ 2>/dev/null || echo 0)
+          AGE=$(( $(date +%s) - LAST ))
+          if [ "$NEW" -gt 0 ] || [ "$AGE" -gt 3600 ]; then
             git commit -m "scan: $(date -u +'%Y-%m-%d %H:%M') UTC"
             git pull --rebase origin ${GITHUB_REF_NAME}
             git push
+          else
+            echo "kun kursopdateringer (alder ${AGE}s) — batches til næste time"
           fi
