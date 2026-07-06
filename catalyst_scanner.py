@@ -429,17 +429,18 @@ def enrich_hit(hit):
             hit["cap_bucket"] = cap_bucket(hit["market_cap"])
 
 
-# Outcome snapshots for the track record: (field, hours after detection).
-SNAPSHOTS = [("price_1h", 1), ("price_1d", 24), ("price_3d", 72)]
-SNAPSHOT_MAX_LATE_DAYS = 14  # fill late (weekend gaps) rather than never
+# Outcome snapshots for the track record:
+# (field, due after N hours, useless after M hours). A snapshot taken far
+# past its horizon poisons the stats (the initial backfill proved it —
+# identical 1h/1d columns), so late ones are skipped, not approximated.
+SNAPSHOTS = [("price_1h", 1, 6), ("price_1d", 24, 48), ("price_3d", 72, 168)]
 
 
 def due_snapshots(hit, now):
-    """Snapshot fields that are due but not yet filled for this hit."""
+    """Snapshot fields that are due, unfilled and still within their window."""
     age_h = (now - datetime.fromisoformat(hit["detected_at"])).total_seconds() / 3600
-    if age_h > SNAPSHOT_MAX_LATE_DAYS * 24:
-        return []
-    return [f for f, hrs in SNAPSHOTS if hit.get(f) is None and age_h >= hrs]
+    return [f for f, hrs, max_h in SNAPSHOTS
+            if hit.get(f) is None and hrs <= age_h <= max_h]
 
 
 def refresh_prices(hits):
@@ -1285,6 +1286,9 @@ def selftest():
     old_hit = {"detected_at": (now - timedelta(hours=75)).isoformat(), "price_1h": 1.0,
                "price_1d": 1.0, "price_3d": None}
     check("snapshots: 3d due at 75h", due_snapshots(old_hit, now) == ["price_3d"])
+    late = {"detected_at": (now - timedelta(hours=10)).isoformat(), "price_1h": None,
+            "price_1d": None, "price_3d": None}
+    check("snapshots: 1h window closed at 10h", due_snapshots(late, now) == [])
     ancient = {"detected_at": (now - timedelta(days=20)).isoformat(), "price_1h": None,
                "price_1d": None, "price_3d": None}
     check("snapshots: too late is skipped", due_snapshots(ancient, now) == [])

@@ -381,9 +381,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 44.93,
-  "price_1d": 44.93,
-  "price_3d": 44.93
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031970",
@@ -422,9 +421,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 5.98,
-  "price_1d": 5.98,
-  "price_3d": 5.98
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031971",
@@ -460,9 +458,8 @@
   "ai_materiality": "high",
   "ai_tickers": [],
   "social": false,
-  "price_1h": 1.1,
-  "price_1d": 1.1,
-  "price_3d": 1.1
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080436",
@@ -502,9 +499,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 37.97,
-  "price_1d": 37.97,
-  "price_3d": 37.97
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001398344-26-011663",
@@ -540,9 +536,8 @@
   "ai_materiality": "medium",
   "ai_tickers": [],
   "social": false,
-  "price_1h": 12.85,
-  "price_1d": 12.85,
-  "price_3d": 12.85
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001683168-26-005262",
@@ -579,9 +574,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.33,
-  "price_1d": 0.33,
-  "price_3d": 0.33
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "rss:CBMivgFBVV95cUxQTUlFUmlNR01Xc3NudlFZM2I2ZEJadnNjLU9aQ1ZITDdlaXJfbjRRMzR4elpCZmRmcEQwdE1xTHZTZV85RlZ5cWJhRlV3RDZCMmF5aF8zMjl0QmdTX0dyTVJUQy0ydUk0dUxOeExmYmRGTGVuMmc4UU4tWERVNERfOG5vTWZCcTdsbXo3V0lMNjc0U1QwYmVjeU5GeEhlYzRvcW1OWUZ1aHViSjl2cXI4ZkdVMFB5NEFyMDAwVGxn",
@@ -712,9 +706,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 24.97,
-  "price_1d": 24.97,
-  "price_3d": 24.97
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001683168-26-005251",
@@ -747,9 +740,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 1.99,
-  "price_1d": 1.99,
-  "price_3d": 1.99
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075013",
@@ -786,9 +778,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 1.89,
-  "price_1d": 1.89,
-  "price_3d": 1.89
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031917",
@@ -822,9 +813,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.47,
-  "price_1d": 0.47,
-  "price_3d": 0.47
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031919",
@@ -860,9 +850,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.5833,
-  "price_1d": 0.5833,
-  "price_3d": 0.5833
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080362",
@@ -930,9 +919,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.32,
-  "price_1d": 0.32,
-  "price_3d": 0.32
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001948056-26-000058",
@@ -1001,9 +989,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 245.97,
-  "price_1d": 245.97,
-  "price_3d": 245.97
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001831481-26-000092",
@@ -1051,9 +1038,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 4.25,
-  "price_1d": 4.25,
-  "price_3d": 4.25
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-294837",
@@ -1093,9 +1079,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 15.11,
-  "price_1d": 15.11,
-  "price_3d": 15.11
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031949",
@@ -1136,9 +1121,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 1.9,
-  "price_1d": 1.9,
-  "price_3d": 1.9
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031946",
@@ -1173,9 +1157,8 @@
   "ai_materiality": "medium",
   "ai_tickers": [],
   "social": false,
-  "price_1h": 3.85,
-  "price_1d": 3.85,
-  "price_3d": 3.85
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001140361-26-027463",
@@ -1215,9 +1198,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 49.59,
-  "price_1d": 49.59,
-  "price_3d": 49.59
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001104659-26-080408",
@@ -1258,9 +1240,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 20.3,
-  "price_1d": 20.3,
-  "price_3d": 20.3
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022557",
@@ -1295,9 +1276,8 @@
   "ai_materiality": "high",
   "ai_tickers": [],
   "social": false,
-  "price_1h": 56.62,
-  "price_1d": 56.62,
-  "price_3d": 56.62
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001493152-26-031954",
@@ -1336,9 +1316,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.31,
-  "price_1d": 0.31,
-  "price_3d": 0.31
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075082",
@@ -1382,9 +1361,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.8151,
-  "price_1d": 0.8151,
-  "price_3d": 0.8151
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001437749-26-022576",
@@ -1427,9 +1405,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 327.87,
-  "price_1d": 327.87,
-  "price_3d": 327.87
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-294943",
@@ -1472,9 +1449,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 1.93,
-  "price_1d": 1.93,
-  "price_3d": 1.93
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075086",
@@ -1517,9 +1493,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 6.55,
-  "price_1d": 6.55,
-  "price_3d": 6.55
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-075090",
@@ -1555,9 +1530,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.282,
-  "price_1d": 0.282,
-  "price_3d": 0.282
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "rss:CBMi2AFBVV95cUxOU2tDSGtHR2llT3o2VnJYWDdEV3VrNGxtTHFOc2Y3VjVzMnRIb2RUNEdqa2dnZlVjeG45ZWFTQlBlbHpmVVQ4UU14dkI2T2l0dndBN3k2bGo0WHNFWDI4N3RHWEphYzNSTzZZck9yT0N0Q3k5SmFtMGRxWEZ1UmgxcTNQX0J0N290NEMzZGcyNU5DMzk1dHMyOG5hR1hybkNmNjJ1QjFkYng5SmRTUmQ4ZFVCSDZSY29CaE10Z2VTY181X000cy1lSHJWV2QtUC1FelkydnhIV1Q",
@@ -1625,9 +1599,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 2.64,
-  "price_1d": 2.64,
-  "price_3d": 2.64
+  "price_1h": null,
+  "price_1d": null
  },
  {
   "id": "social:https://trumpstruth.org/statuses/39668",
@@ -1722,8 +1695,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 14.67,
-  "price_1d": 14.67,
+  "price_1h": null,
+  "price_1d": null,
   "price_3d": 14.67
  },
  {
@@ -1757,8 +1730,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 162.13,
-  "price_1d": 162.13,
+  "price_1h": null,
+  "price_1d": null,
   "price_3d": 162.13
  },
  {
@@ -1921,8 +1894,8 @@
   "ai_materiality": null,
   "ai_tickers": [],
   "social": false,
-  "price_1h": 0.18,
-  "price_1d": 0.18,
+  "price_1h": null,
+  "price_1d": null,
   "price_3d": 0.18
  },
  {
