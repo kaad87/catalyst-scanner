@@ -1,5 +1,40 @@
 [
  {
+  "id": "rss:CBMi6AFBVV95cUxPOUtLZmttVVVPS01JYm51eUU1elVsMVpyckE4bHVOd3ZSZkt1YlJndC1CdGhldG95TGE2SGtRMjhSVE1KQll1RGtSV1pkMU52ck50TXlBdUJCTjByQ0dVdXI2RWc3cUtJVmNUNWc1TVlsOGdzZUtEcUpQYW5PMzN5cjdSYjNPMFZaanN4MWpiLTBTTHZRaDdOd2dlYkE1OUJMbkVuQ3BPUVprbVBveEF5a3lQeGRSZWtMTlJySDhyNG9MOFo1NDFMRnFGZVU0eTNoNGJQeUxrMkdodF8tTWR2MFlRelBLVGh20gHuAUFVX3lxTE8yYVpZY2VmOWVvXzZfQjNXNHhKTlFJQmJOSUdlSlRfaGNuMnBUSEpDd1dzcFJUa0tyUC1YN2dMOV9lZHdmd0NPekpmelZBcGZRZ0lFdHVnYlFCZXVIMU1PNDYyN3pWeTFWMGdyNlozWWlVb1lVNmZkMWhOamV1a3NTcmJnQTNITEZkUHB3NWdJVDBja0dSMGl1b0F3T2dnSzh2bURENE9lTnhkMFdBZ0s1WlB4cE1udHNKaGc4T0xDaE5BOGJVYlNZNzc4X0VTTEQ2SHdPQ0ZWNFM3YjgwZ2V3QXJDVi1OVlU1TDJPa3c",
+  "source": "FDA",
+  "company": "",
+  "ticker": "",
+  "cik": "",
+  "title": "Is Ascletis Pharma (SEHK:1672) Undervalued As FDA Clears Its ASC35 Obesity Trial? - simplywall.st",
+  "url": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxPOUtLZmttVVVPS01JYm51eUU1elVsMVpyckE4bHVOd3ZSZkt1YlJndC1CdGhldG95TGE2SGtRMjhSVE1KQll1RGtSV1pkMU52ck50TXlBdUJCTjByQ0dVdXI2RWc3cUtJVmNUNWc1TVlsOGdzZUtEcUpQYW5PMzN5cjdSYjNPMFZaanN4MWpiLTBTTHZRaDdOd2dlYkE1OUJMbkVuQ3BPUVprbVBveEF5a3lQeGRSZWtMTlJySDhyNG9MOFo1NDFMRnFGZVU0eTNoNGJQeUxrMkdodF8tTWR2MFlRelBLVGh20gHuAUFVX3lxTE8yYVpZY2VmOWVvXzZfQjNXNHhKTlFJQmJOSUdlSlRfaGNuMnBUSEpDd1dzcFJUa0tyUC1YN2dMOV9lZHdmd0NPekpmelZBcGZRZ0lFdHVnYlFCZXVIMU1PNDYyN3pWeTFWMGdyNlozWWlVb1lVNmZkMWhOamV1a3NTcmJnQTNITEZkUHB3NWdJVDBja0dSMGl1b0F3T2dnSzh2bURENE9lTnhkMFdBZ0s1WlB4cE1udHNKaGc4T0xDaE5BOGJVYlNZNzc4X0VTTEQ2SHdPQ0ZWNFM3YjgwZ2V3QXJDVi1OVlU1TDJPa3c?oc=5",
+  "published": "Mon, 06 Jul 2026 05:33:24 GMT",
+  "detected_at": "2026-07-06T09:37:58.606941+00:00",
+  "items": [],
+  "keywords": [
+   "clears"
+  ],
+  "neg_keywords": [],
+  "megacaps": [],
+  "score": 2,
+  "tier": "B",
+  "reason": "keywords: clears",
+  "market_cap": null,
+  "cap_bucket": null,
+  "price_at_detect": null,
+  "price_now": null,
+  "price_change_pct": null,
+  "price_updated_at": null,
+  "price_1h": null,
+  "price_1d": null,
+  "price_3d": null,
+  "volume_ratio": null,
+  "ai_summary": "Ascletis Pharma får godkendelse fra FDA til at gennemføre et vægttabsforsøg med ASC35.",
+  "ai_category": "other",
+  "ai_materiality": "medium",
+  "ai_tickers": [],
+  "social": false
+ },
+ {
   "id": "rss:https://www.prnewswire.com/news-releases/fgr-to-launch-puregraph-cem-into-china-302817869.html",
   "source": "PR Newswire",
   "company": "",
@@ -30,9 +65,9 @@
   "price_1d": null,
   "price_3d": null,
   "volume_ratio": null,
-  "ai_summary": null,
-  "ai_category": null,
-  "ai_materiality": null,
+  "ai_summary": "FGR lancerer PureGRAPH® CEM i Kina.",
+  "ai_category": "other",
+  "ai_materiality": "medium",
   "ai_tickers": [],
   "social": false
  },
@@ -4457,13 +4492,13 @@
   "price_at_detect": 0.6693,
   "price_now": 0.6693,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T21:07:31.863641+00:00",
+  "price_updated_at": "2026-07-06T09:38:03.386950+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "price_1h": null,
   "price_1d": null,
-  "price_3d": null
+  "price_3d": 0.6693
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001193125-26-292834",
@@ -4533,13 +4568,13 @@
   "price_at_detect": 104.47,
   "price_now": 104.47,
   "price_change_pct": 0.0,
-  "price_updated_at": "2026-07-05T21:07:31.863641+00:00",
+  "price_updated_at": "2026-07-06T09:38:03.386950+00:00",
   "ai_summary": null,
   "ai_category": null,
   "ai_materiality": null,
   "price_1h": null,
   "price_1d": null,
-  "price_3d": null
+  "price_3d": 104.47
  },
  {
   "id": "urn:tag:sec.gov,2008:accession-number=0001213900-26-074421",
