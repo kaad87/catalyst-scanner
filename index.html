@@ -417,7 +417,7 @@ function hitCard(h) {
     <div class="row1">
       ${heat === "hot" ? `<span class="fresh">NY</span>` : ""}
       ${h.ticker ? `<span class="ticker">${esc(h.ticker)}</span>` : ""}
-      ${(h.ai_tickers || []).map(t => `<span class="ticker">${esc(t)}</span>`).join("")}
+      ${(h.ai_tickers || []).filter(t => t !== h.ticker).map(t => `<span class="ticker">${esc(t)}</span>`).join("")}
       <span class="src ${srcClass(h)}">${esc(h.source)}</span>
       <span class="badges">${capHtml}${volHtml}${chgHtml}<span class="age" title="${esc(absTime(h.detected_at))}">${ago(h.detected_at)}</span><span class="ext">↗</span></span>
     </div>

@@ -477,9 +477,11 @@ AI_SYSTEM_PROMPT = (
     "pressemeddelelse. Svar KUN med JSON: {\"summary\": \"én kort sætning på "
     "dansk om hvad aftalen konkret er og med hvem\", \"category\": "
     "\"partnership|contract_award|financing|dilution|merger|other\", "
-    "\"materiality\": \"high|medium|low\"}. materiality = hvor væsentlig "
-    "aftalen virker for selskabets omsætning. Udvandende finansiering "
-    "(securities purchase, ATM, warrants) er dilution."
+    "\"materiality\": \"high|medium|low\", \"tickers\": [\"CTSH\"]}. "
+    "tickers = primære amerikanske tickers for de børsnoterede selskaber i "
+    "teksten (hovedaktøren først; tom liste hvis ingen er børsnoterede). "
+    "materiality = hvor væsentlig aftalen virker for selskabets omsætning. "
+    "Udvandende finansiering (securities purchase, ATM, warrants) er dilution."
 )
 
 
@@ -512,7 +514,9 @@ def parse_ai_response(raw):
             mat = "low"
         if not summary:
             return None
-        return {"ai_summary": summary[:300], "ai_category": cat, "ai_materiality": mat}
+        tickers = obj.get("tickers") or []
+        return {"ai_summary": summary[:300], "ai_category": cat, "ai_materiality": mat,
+                "ai_tickers": [str(t).upper()[:6] for t in tickers if t][:8]}
     except (ValueError, KeyError, IndexError, TypeError):
         return None
 
@@ -525,11 +529,22 @@ def parse_social_response(raw):
     try:
         obj = json.loads(json.loads(raw)["choices"][0]["message"]["content"])
         fields["relevant"] = bool(obj.get("relevant"))
-        tickers = obj.get("tickers") or []
-        fields["ai_tickers"] = [str(t).upper()[:6] for t in tickers if t][:8]
         return fields
     except (ValueError, KeyError, IndexError, TypeError):
         return None
+
+
+def should_adopt_ai_ticker(hit, now=None):
+    """Adopt the AI-extracted ticker for price tracking?
+
+    Only when the hit has no SEC ticker, the AI found one, and detection is
+    recent enough that today's price is still an honest baseline.
+    """
+    if hit["ticker"] or not hit.get("ai_tickers"):
+        return False
+    now = now or datetime.now(timezone.utc)
+    age_h = (now - datetime.fromisoformat(hit["detected_at"])).total_seconds() / 3600
+    return age_h <= 2
 
 
 def openai_chat(system_prompt, user_content):
@@ -1080,6 +1095,9 @@ def run(doc_limit):
         elif hit["tier"] in ("A", "B") and ai_budget > 0:
             if ai_annotate(hit, text or hit["title"]):
                 ai_budget -= 1
+        if should_adopt_ai_ticker(hit):
+            hit["ticker"] = hit["ai_tickers"][0]
+            enrich_hit(hit)  # ticker-less hits were skipped the first time
 
     new_hits = [h for h, _ in results]
     if new_hits:
@@ -1102,6 +1120,9 @@ def run(doc_limit):
             if ai_annotate(hit, refetch_text(hit) or hit["title"]):
                 ai_budget -= 1
                 log("AI backfill: %s" % hit["title"][:60])
+                if should_adopt_ai_ticker(hit):
+                    hit["ticker"] = hit["ai_tickers"][0]
+                    enrich_hit(hit)
     refresh_prices(hits)
     save_json(HITS_FILE, hits)
     save_json(SEEN_FILE, seen)
@@ -1178,6 +1199,7 @@ SELFTEST_AI_RESPONSE = json.dumps({
         "summary": "3-årig leveringsaftale med Walmart om private label-produkter.",
         "category": "partnership",
         "materiality": "high",
+        "tickers": ["wmt", "COST"],
     })}}]
 })
 
@@ -1237,7 +1259,20 @@ def selftest():
     check("AI response parsing", fields is not None
           and fields["ai_category"] == "partnership"
           and fields["ai_materiality"] == "high")
+    check("AI response extracts tickers", fields["ai_tickers"] == ["WMT", "COST"])
     check("AI response parsing rejects garbage", parse_ai_response("not json") is None)
+
+    # AI-ticker adoption: only ticker-less, fresh hits
+    fresh_iso = datetime.now(timezone.utc).isoformat()
+    stale_iso = (datetime.now(timezone.utc) - timedelta(hours=5)).isoformat()
+    check("ticker adoption: fresh ticker-less hit", should_adopt_ai_ticker(
+        {"ticker": "", "ai_tickers": ["CTSH"], "detected_at": fresh_iso}))
+    check("ticker adoption: skip when SEC ticker exists", not should_adopt_ai_ticker(
+        {"ticker": "SRFM", "ai_tickers": ["CTSH"], "detected_at": fresh_iso}))
+    check("ticker adoption: skip stale baseline", not should_adopt_ai_ticker(
+        {"ticker": "", "ai_tickers": ["CTSH"], "detected_at": stale_iso}))
+    check("ticker adoption: skip without AI tickers", not should_adopt_ai_ticker(
+        {"ticker": "", "ai_tickers": [], "detected_at": fresh_iso}))
 
     # AI veto: financing classification demotes B to C
     veto_hit = {"tier": "B", "reason": "x", "ai_category": "financing", "ai_materiality": "low"}
