@@ -395,6 +395,21 @@ def fetch_price(ticker):
     return fetch_quote(ticker)[0]
 
 
+_spy_cache = {}
+
+
+def spy_price():
+    """SPY price, fetched once per run (the market baseline for alpha)."""
+    if "p" not in _spy_cache:
+        _spy_cache["p"] = fetch_price("SPY")
+    return _spy_cache["p"]
+
+
+def spy_field(price_field):
+    """price_1d -> spy_1d, price_at_detect -> spy_at_detect."""
+    return "spy_" + price_field.split("_", 1)[1]
+
+
 def fetch_shares(cik):
     """Shares outstanding from SEC companyfacts, or None."""
     try:
@@ -422,6 +437,8 @@ def enrich_hit(hit):
     hit["price_change_pct"] = 0.0 if price else None
     hit["price_updated_at"] = datetime.now(timezone.utc).isoformat()
     hit["volume_ratio"] = ratio
+    if price:
+        hit["spy_at_detect"] = spy_price()
     if price and hit.get("cik"):
         shares = fetch_shares(hit["cik"].lstrip("0") or "0")
         if shares:
@@ -463,6 +480,7 @@ def refresh_prices(hits):
                 hit["volume_ratio"] = max(ratio, hit.get("volume_ratio") or 0)
             for field in due_snapshots(hit, now):
                 hit[field] = price
+                hit[spy_field(field)] = spy_price()  # market baseline at the same moment
                 snapped += 1
             updated += 1
         time.sleep(0.2)
@@ -652,6 +670,9 @@ def make_hit(**fields):
         "price_at_detect": None, "price_now": None,
         "price_change_pct": None, "price_updated_at": None,
         "price_1h": None, "price_1d": None, "price_3d": None,
+        # SPY at the same moments, so the dashboard can show market-relative
+        # alpha ("did it beat the market?") instead of raw return.
+        "spy_at_detect": None, "spy_1h": None, "spy_1d": None, "spy_3d": None,
         "volume_ratio": None,
         "ai_summary": None, "ai_category": None, "ai_materiality": None,
         "ai_tickers": [], "social": False,
@@ -1042,6 +1063,7 @@ def check_watchdog(health):
 # ------------------------------------------------------------------ main
 
 def run(doc_limit):
+    _spy_cache.clear()  # one fresh SPY baseline per run
     seen = prune_seen(load_json(SEEN_FILE, {}))
     hits = load_json(HITS_FILE, [])
     known_ids = {h["id"] for h in hits}
@@ -1254,6 +1276,11 @@ def selftest():
 
     check("cap buckets", (cap_bucket(500_000_000), cap_bucket(5_000_000_000),
                           cap_bucket(50_000_000_000)) == ("small", "mid", "large"))
+
+    check("spy_field mapping", (spy_field("price_1d"), spy_field("price_at_detect"))
+          == ("spy_1d", "spy_at_detect"))
+    check("make_hit has spy fields", all(k in make_hit()
+          for k in ("spy_at_detect", "spy_1h", "spy_1d", "spy_3d")))
 
     fields = parse_ai_response(SELFTEST_AI_RESPONSE)
     check("AI response parsing", fields is not None

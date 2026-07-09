@@ -462,32 +462,39 @@ function avg(list) {
   return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
 }
 
+// alpha = aktiens afkast minus SPY's afkast over samme vindue
+function alpha(h, priceField, spyF) {
+  const s = pct(h.price_at_detect, h[priceField]);
+  const m = pct(h.spy_at_detect, h[spyF]);
+  return s === null || m === null ? null : s - m;
+}
+
 function renderTrack() {
   const grid = document.getElementById("trackGrid");
   const tiers = ["A", "B"].map(t => {
-    const rows = hits.filter(h => h.tier === t && h.price_at_detect);
-    const r1h = rows.map(h => pct(h.price_at_detect, h.price_1h));
-    const r1d = rows.map(h => pct(h.price_at_detect, h.price_1d));
-    const r3d = rows.map(h => pct(h.price_at_detect, h.price_3d || h.price_now));
-    const settled = r1d.filter(x => x !== null);
-    const hitrate = settled.length ? settled.filter(x => x > 0).length / settled.length * 100 : null;
-    // paper portfolio: $1.000 pr. signal ved detektionskursen
-    const pnl = r3d.filter(x => x !== null).reduce((a, x) => a + 1000 * x / 100, 0);
-    return { t, n: rows.length, a1h: avg(r1h), a1d: avg(r1d), a3d: avg(r3d), hitrate, pnl, settled: settled.length };
+    const rows = hits.filter(h => h.tier === t && h.price_at_detect && h.spy_at_detect);
+    const a1h = rows.map(h => alpha(h, "price_1h", "spy_1h"));
+    const a1d = rows.map(h => alpha(h, "price_1d", "spy_1d"));
+    const a3d = rows.map(h => alpha(h, "price_3d", "spy_3d"));
+    const settled = a1d.filter(x => x !== null);
+    const beat = settled.length ? settled.filter(x => x > 0).length / settled.length * 100 : null;
+    // markedsneutral papir-P&L: $1.000 long aktie / short SPY pr. signal
+    const pnl = a3d.filter(x => x !== null).reduce((a, x) => a + 1000 * x / 100, 0);
+    return { t, n: rows.length, a1h: avg(a1h), a1d: avg(a1d), a3d: avg(a3d), beat, pnl, settled: settled.length };
   });
   const cls = v => v === null ? "" : v >= 0 ? "pos" : "neg";
   grid.innerHTML = `<table>
-    <tr><th>Tier</th><th>Signaler</th><th>Hit-rate 1d</th><th>Gns. 1t</th><th>Gns. 1d</th><th>Gns. 3d</th><th>Papir-P&L ($1.000/signal)</th></tr>
+    <tr><th>Tier</th><th>Målt</th><th>Slår marked 1d</th><th>α 1t</th><th>α 1d</th><th>α 3d</th><th>Papir-P&L, markedsneutral ($1.000/signal)</th></tr>
     ${tiers.map(x => `<tr>
       <td>${x.t}</td><td>${x.n}</td>
-      <td>${x.hitrate === null ? "–" : Math.round(x.hitrate) + "% (" + x.settled + ")"}</td>
+      <td>${x.beat === null ? "–" : Math.round(x.beat) + "% (" + x.settled + ")"}</td>
       <td class="${cls(x.a1h)}">${fmtPct(x.a1h)}</td>
       <td class="${cls(x.a1d)}">${fmtPct(x.a1d)}</td>
       <td class="${cls(x.a3d)}">${fmtPct(x.a3d)}</td>
       <td class="${cls(x.pnl)}">${x.pnl < 0 ? "-" : "+"}$${Math.abs(Math.round(x.pnl))}</td>
     </tr>`).join("")}
   </table>
-  <div class="track-note">Kurssnapshots tages 1 t / 1 dag / 3 dage efter detektion (ca. — cron-takten sætter opløsningen). Hit-rate = andel med positiv kurs efter 1 dag. Tallene bliver først meningsfulde efter et par ugers data.</div>`;
+  <div class="track-note">α = merafkast vs. S&P 500 (SPY) over samme vindue — positivt = signalet slog markedet. "Slår marked" = andel med positiv α efter 1 dag. Papir-P&L er markedsneutral (long aktie / short SPY, $1.000/signal). Snapshots tages 1 t / 1 dag / 3 dage efter detektion; tallene bliver først meningsfulde efter et par ugers data.</div>`;
 }
 
 async function loadHealth() {
