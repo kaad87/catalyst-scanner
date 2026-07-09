@@ -207,6 +207,7 @@
   .src.wire { color: #b9a5ff; background: rgba(154, 123, 255, .12); }
   .src.fda { color: var(--aurora); background: rgba(61, 223, 164, .1); }
   .src.social { color: var(--amber); background: rgba(245, 201, 123, .12); }
+  .src.earn { color: #ff9e64; background: rgba(255, 158, 100, .12); }
   .fresh {
     font: 700 10px "Inter", sans-serif; letter-spacing: 1px;
     color: var(--amber); border: 1px solid rgba(245, 201, 123, .5);
@@ -377,12 +378,14 @@ function safeUrl(u) {
 }
 const CAT_LABEL = { partnership: "partnerskab", contract_award: "kontrakt",
   financing: "finansiering", dilution: "udvanding", merger: "M&A",
-  policy: "politik", other: "andet" };
+  policy: "politik", earnings: "regnskab", other: "andet" };
 const CAT_CLS = { partnership: "good", contract_award: "good",
-  financing: "bad", dilution: "bad", merger: "meh", policy: "meh", other: "meh" };
+  financing: "bad", dilution: "bad", merger: "meh", policy: "meh",
+  earnings: "good", other: "meh" };
 function srcClass(h) {
   if (h.social) return "social";
   if (h.source === "FDA") return "fda";
+  if (h.source === "Regnskab") return "earn";
   return h.source.startsWith("SEC") ? "sec" : "wire";
 }
 
@@ -473,28 +476,29 @@ function renderTrack() {
   const grid = document.getElementById("trackGrid");
   const tiers = ["A", "B"].map(t => {
     const rows = hits.filter(h => h.tier === t && h.price_at_detect && h.spy_at_detect);
-    const a1h = rows.map(h => alpha(h, "price_1h", "spy_1h"));
     const a1d = rows.map(h => alpha(h, "price_1d", "spy_1d"));
     const a3d = rows.map(h => alpha(h, "price_3d", "spy_3d"));
+    const a20d = rows.map(h => alpha(h, "price_20d", "spy_20d"));
     const settled = a1d.filter(x => x !== null);
     const beat = settled.length ? settled.filter(x => x > 0).length / settled.length * 100 : null;
     // markedsneutral papir-P&L: $1.000 long aktie / short SPY pr. signal
     const pnl = a3d.filter(x => x !== null).reduce((a, x) => a + 1000 * x / 100, 0);
-    return { t, n: rows.length, a1h: avg(a1h), a1d: avg(a1d), a3d: avg(a3d), beat, pnl, settled: settled.length };
+    return { t, n: rows.length, a1d: avg(a1d), a3d: avg(a3d), a20d: avg(a20d),
+             beat, pnl, settled: settled.length, n20: a20d.filter(x => x !== null).length };
   });
   const cls = v => v === null ? "" : v >= 0 ? "pos" : "neg";
   grid.innerHTML = `<table>
-    <tr><th>Tier</th><th>Målt</th><th>Slår marked 1d</th><th>α 1t</th><th>α 1d</th><th>α 3d</th><th>Papir-P&L, markedsneutral ($1.000/signal)</th></tr>
+    <tr><th>Tier</th><th>Målt</th><th>Slår marked 1d</th><th>α 1d</th><th>α 3d</th><th>α 20d</th><th>Papir-P&L, markedsneutral ($1.000/signal)</th></tr>
     ${tiers.map(x => `<tr>
       <td>${x.t}</td><td>${x.n}</td>
       <td>${x.beat === null ? "–" : Math.round(x.beat) + "% (" + x.settled + ")"}</td>
-      <td class="${cls(x.a1h)}">${fmtPct(x.a1h)}</td>
       <td class="${cls(x.a1d)}">${fmtPct(x.a1d)}</td>
       <td class="${cls(x.a3d)}">${fmtPct(x.a3d)}</td>
+      <td class="${cls(x.a20d)}">${x.n20 ? fmtPct(x.a20d) : "–"}</td>
       <td class="${cls(x.pnl)}">${x.pnl < 0 ? "-" : "+"}$${Math.abs(Math.round(x.pnl))}</td>
     </tr>`).join("")}
   </table>
-  <div class="track-note">α = merafkast vs. S&P 500 (SPY) over samme vindue — positivt = signalet slog markedet. "Slår marked" = andel med positiv α efter 1 dag. Papir-P&L er markedsneutral (long aktie / short SPY, $1.000/signal). Snapshots tages 1 t / 1 dag / 3 dage efter detektion; tallene bliver først meningsfulde efter et par ugers data.</div>`;
+  <div class="track-note">α = merafkast vs. S&P 500 (SPY) over samme vindue — positivt = signalet slog markedet. "Slår marked" = andel med positiv α efter 1 dag. α 20d fanger post-earnings drift (fylder efter ~3 uger). Papir-P&L er markedsneutral (long aktie / short SPY, $1.000/signal). Tallene bliver først meningsfulde efter et par ugers data.</div>`;
 }
 
 async function loadHealth() {

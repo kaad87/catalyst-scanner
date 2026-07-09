@@ -450,7 +450,9 @@ def enrich_hit(hit):
 # (field, due after N hours, useless after M hours). A snapshot taken far
 # past its horizon poisons the stats (the initial backfill proved it —
 # identical 1h/1d columns), so late ones are skipped, not approximated.
-SNAPSHOTS = [("price_1h", 1, 6), ("price_1d", 24, 48), ("price_3d", 72, 168)]
+# 20d captures post-earnings drift, which plays out over weeks.
+SNAPSHOTS = [("price_1h", 1, 6), ("price_1d", 24, 48), ("price_3d", 72, 168),
+             ("price_20d", 480, 960)]
 
 
 def due_snapshots(hit, now):
@@ -669,10 +671,11 @@ def make_hit(**fields):
         "market_cap": None, "cap_bucket": None,
         "price_at_detect": None, "price_now": None,
         "price_change_pct": None, "price_updated_at": None,
-        "price_1h": None, "price_1d": None, "price_3d": None,
+        "price_1h": None, "price_1d": None, "price_3d": None, "price_20d": None,
         # SPY at the same moments, so the dashboard can show market-relative
         # alpha ("did it beat the market?") instead of raw return.
-        "spy_at_detect": None, "spy_1h": None, "spy_1d": None, "spy_3d": None,
+        "spy_at_detect": None, "spy_1h": None, "spy_1d": None,
+        "spy_3d": None, "spy_20d": None,
         "volume_ratio": None,
         "ai_summary": None, "ai_category": None, "ai_materiality": None,
         "ai_tickers": [], "social": False,
@@ -762,6 +765,95 @@ SEC_FORM4_ATOM_URL = (
     "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
     "&type=4&company=&dateb=&owner=include&count=100&output=atom"
 )
+
+# Post-earnings-announcement drift (PEAD): stocks with big positive earnings
+# surprises tend to drift up for weeks — the market underreacts. Nasdaq's
+# earnings calendar is free, keyless and gives actual EPS vs. forecast.
+NASDAQ_EARNINGS_URL = "https://api.nasdaq.com/api/calendar/earnings?date={date}"
+PEAD_MIN_SURPRISE = 10.0    # percent; below this the drift signal is weak
+PEAD_A_SURPRISE = 25.0      # a blowout quarter
+PEAD_MIN_FORECAST = 0.05    # ignore penny-EPS where % surprise is noise
+
+
+def _money(s):
+    """'$1,234.56' / '($0.12)' -> float, or None."""
+    if not s or s in ("N/A", ""):
+        return None
+    neg = s.strip().startswith("(")
+    try:
+        v = float(re.sub(r"[^\d.]", "", s))
+        return -v if neg else v
+    except ValueError:
+        return None
+
+
+def parse_earnings_row(row):
+    """A Nasdaq earnings row -> (surprise_pct, actual, forecast, market_cap) or None.
+
+    Only rows that have actually reported (actual + forecast present) with a
+    meaningful forecast magnitude qualify.
+    """
+    actual = _money(row.get("eps"))
+    forecast = _money(row.get("epsForecast"))
+    if actual is None or forecast is None or abs(forecast) < PEAD_MIN_FORECAST:
+        return None
+    try:
+        surprise = float(row.get("surprise"))
+    except (TypeError, ValueError):
+        if forecast == 0:
+            return None
+        surprise = (actual - forecast) / abs(forecast) * 100
+    return surprise, actual, forecast, _money(row.get("marketCap"))
+
+
+def scan_earnings(seen, fetch_dates=2):
+    """Scan Nasdaq's earnings calendar for big positive surprises (PEAD)."""
+    results = []
+    now = datetime.now(timezone.utc)
+    for delta in range(fetch_dates):
+        date = (now - timedelta(days=delta)).strftime("%Y-%m-%d")
+        try:
+            data = json.loads(http_get(NASDAQ_EARNINGS_URL.format(date=date), browser=True))
+        except Exception as exc:
+            log("warning: earnings fetch failed for %s (%s)" % (date, exc))
+            continue
+        rows = (data.get("data") or {}).get("rows") or []
+        for row in rows:
+            symbol = (row.get("symbol") or "").strip().upper()
+            if not symbol:
+                continue
+            key = "earn:%s:%s" % (symbol, row.get("fiscalQuarterEnding", date))
+            if key in seen:
+                continue
+            parsed = parse_earnings_row(row)
+            if parsed is None:
+                continue  # not reported yet or penny-EPS noise
+            surprise, actual, forecast, mcap = parsed
+            seen[key] = now.isoformat()
+            if surprise < PEAD_MIN_SURPRISE:
+                continue  # negative or small surprise: no drift edge
+            score = 6 if surprise >= PEAD_A_SURPRISE else 4
+            reason = ("Regnskabsoverraskelse: EPS $%.2f vs. forventet $%.2f (+%.1f%%)"
+                      % (actual, forecast, surprise))
+            hit = make_hit(
+                id=key,
+                source="Regnskab",
+                company=(row.get("name") or symbol).strip(),
+                ticker=symbol,
+                title="Regnskab — %s" % (row.get("name") or symbol).strip(),
+                url="https://www.nasdaq.com/market-activity/stocks/%s/earnings" % symbol.lower(),
+                published=date,
+                detected_at=now.isoformat(),
+                score=score,
+                tier=tier_for(score),
+                reason=reason,
+                market_cap=int(mcap) if mcap else None,
+                cap_bucket=cap_bucket(int(mcap)) if mcap else None,
+                ai_category="earnings",
+            )
+            results.append((hit, ""))
+    log("Nasdaq earnings: %d surprise hit(s)" % len(results))
+    return results
 
 
 def parse_form4(xml_text):
@@ -1083,6 +1175,12 @@ def run(doc_limit):
     except Exception as exc:
         log("warning: Form 4 scan failed (%s)" % exc)
         update_health(health, "SEC Form 4", exc)
+    try:
+        results += scan_earnings(seen)
+        update_health(health, "Regnskab")
+    except Exception as exc:
+        log("warning: earnings scan failed (%s)" % exc)
+        update_health(health, "Regnskab", exc)
     for source, feed_url, keyword_override, max_age in RSS_FEEDS:
         try:
             results += scan_rss(source, feed_url, seen, keyword_override, max_age)
@@ -1105,7 +1203,7 @@ def run(doc_limit):
     have_key = bool(os.environ.get("OPENAI_API_KEY"))
     for hit, text in results:
         enrich_hit(hit)
-        if hit["source"] == "SEC Form 4":
+        if hit["source"] in ("SEC Form 4", "Regnskab"):
             continue  # reason is already self-explanatory; save AI budget
         if hit.get("social"):
             if have_key and social_budget > 0:
@@ -1279,6 +1377,21 @@ def selftest():
 
     check("spy_field mapping", (spy_field("price_1d"), spy_field("price_at_detect"))
           == ("spy_1d", "spy_at_detect"))
+
+    # PEAD earnings parsing
+    er = parse_earnings_row({"eps": "$0.28", "epsForecast": "$0.24", "surprise": "16.67",
+                             "marketCap": "$9,372,610,637"})
+    check("earnings: surprise parsed", er is not None and round(er[0], 1) == 16.7
+          and er[3] == 9_372_610_637)
+    check("earnings: not-yet-reported skipped",
+          parse_earnings_row({"eps": "", "epsForecast": "$0.24", "surprise": "N/A"}) is None)
+    check("earnings: penny-EPS noise skipped",
+          parse_earnings_row({"eps": "$0.02", "epsForecast": "$0.01", "surprise": "100"}) is None)
+    check("earnings: computes surprise when field missing",
+          round(parse_earnings_row({"eps": "$1.10", "epsForecast": "$1.00"})[0], 0) == 10)
+    check("money parser", (_money("$1,234.56"), _money("($0.12)"), _money("N/A"))
+          == (1234.56, -0.12, None))
+    check("20d snapshot in model", "price_20d" in make_hit() and "spy_20d" in make_hit())
     check("make_hit has spy fields", all(k in make_hit()
           for k in ("spy_at_detect", "spy_1h", "spy_1d", "spy_3d")))
 
@@ -1351,8 +1464,9 @@ def selftest():
     late = {"detected_at": (now - timedelta(hours=10)).isoformat(), "price_1h": None,
             "price_1d": None, "price_3d": None}
     check("snapshots: 1h window closed at 10h", due_snapshots(late, now) == [])
-    ancient = {"detected_at": (now - timedelta(days=20)).isoformat(), "price_1h": None,
-               "price_1d": None, "price_3d": None}
+    check("snapshots: 20d due at 22d", due_snapshots(
+        {"detected_at": (now - timedelta(days=22)).isoformat()}, now) == ["price_20d"])
+    ancient = {"detected_at": (now - timedelta(days=45)).isoformat()}
     check("snapshots: too late is skipped", due_snapshots(ancient, now) == [])
 
     # watchdog: stale source flagged once, healthy source untouched
