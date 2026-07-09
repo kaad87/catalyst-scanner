@@ -188,6 +188,24 @@ MAX_PRICE_REFRESH = 30     # Yahoo lookups per run for the refresh pass
 MAX_FORM4_FETCHES = 25     # Form 4 deep-fetch cap per run
 MIN_INSIDER_BUY = 100_000  # USD; open-market buys below this are ignored
 
+# Theme radar (an information edge, not sentiment): SEC full-text search
+# surfaces companies filing about an emerging theme — catch a small-cap
+# associating itself with a hot narrative before it's mainstream. Curated
+# and easily edited: (search phrase, dashboard label).
+THEMES = [
+    ("GLP-1", "GLP-1 / vægttab"),
+    ("small modular reactor", "Atomkraft (SMR)"),
+    ("quantum computing", "Kvantecomputere"),
+    ("stablecoin", "Stablecoins"),
+    ("humanoid robot", "Humanoide robotter"),
+    ("sovereign AI", "Suveræn AI"),
+    ("rare earth", "Sjældne jordarter"),
+    ("nuclear fusion", "Fusionsenergi"),
+]
+SEC_FTS_URL = "https://efts.sec.gov/LATEST/search-index"
+THEME_FORMS = "8-K,S-1,424B4,425,6-K,10-Q"  # skip routine 10-K/proxy noise
+THEME_MAX_PER_THEME = 8
+
 _KEYWORD_RES = [re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I)
                 for k in KEYWORDS]
 _NEGATIVE_RES = [re.compile(r"\b" + re.escape(k).replace(r"\ ", r"\s+") + r"\b", re.I)
@@ -856,6 +874,79 @@ def scan_earnings(seen, fetch_dates=2):
     return results
 
 
+def parse_display_name(display):
+    """'Acme Inc.  (ACME, ACMW)  (CIK 0001234567)' -> ('Acme Inc.', 'ACME')."""
+    name = re.split(r"\s*\(", display, 1)[0].strip()
+    m = re.search(r"\(([A-Z][A-Z.\-]*)(?:,[^)]*)?\)\s*\(CIK", display)
+    return name, (m.group(1) if m else "")
+
+
+def scan_themes(seen, ticker_map, now=None):
+    """SEC full-text theme radar. Gated to run ~hourly (efts updates slowly).
+
+    Flags companies filing about a curated emerging theme — an information
+    edge (surfacing) rather than a hard catalyst, so these land as Tier B.
+    """
+    now = now or datetime.now(timezone.utc)
+    if now.minute >= 5:
+        return []  # cron fires every 5 min; only run at the top of the hour
+    results = []
+    startdt = (now - timedelta(days=3)).strftime("%Y-%m-%d")
+    enddt = now.strftime("%Y-%m-%d")
+    for phrase, label in THEMES:
+        params = urllib.parse.urlencode({
+            "q": '"%s"' % phrase, "forms": THEME_FORMS,
+            "startdt": startdt, "enddt": enddt,
+        })
+        try:
+            time.sleep(SEC_REQUEST_DELAY)
+            data = json.loads(http_get(SEC_FTS_URL + "?" + params))
+        except Exception as exc:
+            log("warning: theme search failed for %s (%s)" % (label, exc))
+            continue
+        seen_this = 0
+        for entry in data.get("hits", {}).get("hits", []):
+            src = entry.get("_source", {})
+            ciks = src.get("ciks") or [""]
+            cik = ciks[0]
+            key = "theme:%s:%s" % (phrase, cik)  # one hit per company per theme/week
+            if key in seen:
+                continue
+            seen[key] = now.isoformat()
+            if seen_this >= THEME_MAX_PER_THEME:
+                continue
+            seen_this += 1
+            names = src.get("display_names") or [""]
+            company, ticker = parse_display_name(names[0])
+            form = (src.get("root_forms") or src.get("form") or [""])
+            form = form[0] if isinstance(form, list) else form
+            adsh = src.get("adsh", "")
+            url = ("https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany"
+                   "&CIK=%s&type=&dateb=&owner=include&count=10" % cik.lstrip("0"))
+            if adsh:
+                folder = adsh.replace("-", "")
+                url = ("https://www.sec.gov/Archives/edgar/data/%s/%s/%s-index.htm"
+                       % (cik.lstrip("0"), folder, adsh))
+            hit = make_hit(
+                id=key,
+                source="Tema",
+                company=company,
+                ticker=ticker or ticker_map.get(cik.lstrip("0"), ""),
+                cik=cik,
+                title="Tema — %s" % company,
+                url=url,
+                published=src.get("file_date", ""),
+                detected_at=now.isoformat(),
+                score=2,
+                tier="B",
+                reason="Tema: %s nævnt i %s-filing" % (label, form),
+                ai_category="theme",
+            )
+            results.append((hit, ""))
+    log("Tema-radar: %d filing(s) på tværs af %d temaer" % (len(results), len(THEMES)))
+    return results
+
+
 def parse_form4(xml_text):
     """Extract open-market insider buys from a Form 4 ownershipDocument.
 
@@ -1181,6 +1272,12 @@ def run(doc_limit):
     except Exception as exc:
         log("warning: earnings scan failed (%s)" % exc)
         update_health(health, "Regnskab", exc)
+    try:
+        results += scan_themes(seen, ticker_map)
+        update_health(health, "Tema")
+    except Exception as exc:
+        log("warning: theme scan failed (%s)" % exc)
+        update_health(health, "Tema", exc)
     for source, feed_url, keyword_override, max_age in RSS_FEEDS:
         try:
             results += scan_rss(source, feed_url, seen, keyword_override, max_age)
@@ -1203,7 +1300,7 @@ def run(doc_limit):
     have_key = bool(os.environ.get("OPENAI_API_KEY"))
     for hit, text in results:
         enrich_hit(hit)
-        if hit["source"] in ("SEC Form 4", "Regnskab"):
+        if hit["source"] in ("SEC Form 4", "Regnskab", "Tema"):
             continue  # reason is already self-explanatory; save AI budget
         if hit.get("social"):
             if have_key and social_budget > 0:
@@ -1392,6 +1489,14 @@ def selftest():
     check("money parser", (_money("$1,234.56"), _money("($0.12)"), _money("N/A"))
           == (1234.56, -0.12, None))
     check("20d snapshot in model", "price_20d" in make_hit() and "spy_20d" in make_hit())
+
+    # theme radar: display-name parsing + hourly gate
+    check("display name parse", parse_display_name(
+        "Acme Robotics Inc.  (ACME, ACMW)  (CIK 0001234567)") == ("Acme Robotics Inc.", "ACME"))
+    check("display name no ticker", parse_display_name(
+        "Private Fund LLC  (CIK 0009999999)") == ("Private Fund LLC", ""))
+    off = datetime.now(timezone.utc).replace(minute=20)
+    check("theme gate: skips off-hour (offline)", scan_themes({}, {}, now=off) == [])
     check("make_hit has spy fields", all(k in make_hit()
           for k in ("spy_at_detect", "spy_1h", "spy_1d", "spy_3d")))
 

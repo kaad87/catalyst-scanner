@@ -208,6 +208,7 @@
   .src.fda { color: var(--aurora); background: rgba(61, 223, 164, .1); }
   .src.social { color: var(--amber); background: rgba(245, 201, 123, .12); }
   .src.earn { color: #ff9e64; background: rgba(255, 158, 100, .12); }
+  .src.theme { color: #c4a5ff; background: rgba(196, 165, 255, .12); }
   .fresh {
     font: 700 10px "Inter", sans-serif; letter-spacing: 1px;
     color: var(--amber); border: 1px solid rgba(245, 201, 123, .5);
@@ -378,14 +379,15 @@ function safeUrl(u) {
 }
 const CAT_LABEL = { partnership: "partnerskab", contract_award: "kontrakt",
   financing: "finansiering", dilution: "udvanding", merger: "M&A",
-  policy: "politik", earnings: "regnskab", other: "andet" };
+  policy: "politik", earnings: "regnskab", theme: "tema", other: "andet" };
 const CAT_CLS = { partnership: "good", contract_award: "good",
   financing: "bad", dilution: "bad", merger: "meh", policy: "meh",
-  earnings: "good", other: "meh" };
+  earnings: "good", theme: "meh", other: "meh" };
 function srcClass(h) {
   if (h.social) return "social";
   if (h.source === "FDA") return "fda";
   if (h.source === "Regnskab") return "earn";
+  if (h.source === "Tema") return "theme";
   return h.source.startsWith("SEC") ? "sec" : "wire";
 }
 
