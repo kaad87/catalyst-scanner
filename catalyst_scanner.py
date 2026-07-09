@@ -50,6 +50,7 @@ HITS_FILE = DATA_DIR / "hits.json"
 SEEN_FILE = DATA_DIR / "seen.json"
 TICKERS_FILE = DATA_DIR / "tickers.json"
 HEALTH_FILE = DATA_DIR / "health.json"
+INSIDER_FILE = DATA_DIR / "insider.json"
 
 SEC_ATOM_URL = (
     "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent"
@@ -187,6 +188,11 @@ PRICE_REFRESH_HOURS = 80   # keep updating price_now for hits this fresh (covers
 MAX_PRICE_REFRESH = 30     # Yahoo lookups per run for the refresh pass
 MAX_FORM4_FETCHES = 25     # Form 4 deep-fetch cap per run
 MIN_INSIDER_BUY = 100_000  # USD; open-market buys below this are ignored
+INSIDER_CLUSTER_DAYS = 30  # window for counting distinct insider buyers
+INSIDER_LEDGER_KEEP_DAYS = 40
+# Research: a CEO/CFO open-market buy is far more predictive than a director's,
+# and several insiders buying at once (a cluster) is the strongest tell.
+_TOP_EXEC_RE = re.compile(r"\b(CEO|CFO|COO|chief|president|chair)\b", re.I)
 
 # Theme radar (an information edge, not sentiment): SEC full-text search
 # surfaces companies filing about an emerging theme — catch a small-cap
@@ -989,6 +995,53 @@ def parse_form4(xml_text):
         return None
 
 
+def is_top_exec(role):
+    """CEO/CFO/COO/President/Chair — the high-signal insider roles."""
+    return bool(_TOP_EXEC_RE.search(role or ""))
+
+
+def insider_score(usd, role, cluster_count):
+    """Score an open-market insider buy. See tier_for for A/B cutoffs.
+
+    Baseline 3 (a >=$100k buy is already a B). Top-exec conviction, large
+    size, and a cluster of distinct buyers each push it toward A.
+    """
+    score = 3
+    if is_top_exec(role):
+        score += 2
+    if usd >= 1_000_000:
+        score += 2
+    elif usd >= 250_000:
+        score += 1
+    if cluster_count >= 2:  # several insiders buying at once = strongest tell
+        score += 3
+    return score
+
+
+def record_insider_buy(ledger, ticker, owner, usd, now):
+    """Log a buy and return the count of distinct buyers in the cluster window.
+
+    Ledger: {ticker: [[owner, iso_date, usd], ...]}, pruned by the caller.
+    """
+    if not ticker:
+        return 1
+    entries = ledger.setdefault(ticker, [])
+    entries.append([owner, now.isoformat(), usd])
+    cutoff = (now - timedelta(days=INSIDER_CLUSTER_DAYS)).isoformat()
+    owners = {e[0] for e in entries if e[1] >= cutoff}
+    return len(owners)
+
+
+def prune_insider_ledger(ledger, now):
+    cutoff = (now - timedelta(days=INSIDER_LEDGER_KEEP_DAYS)).isoformat()
+    for ticker in list(ledger):
+        kept = [e for e in ledger[ticker] if e[1] >= cutoff]
+        if kept:
+            ledger[ticker] = kept
+        else:
+            del ledger[ticker]
+
+
 def find_form4_xml(index_url):
     """URL of the ownershipDocument XML in a Form 4 filing folder, or None."""
     folder = index_url.rsplit("/", 1)[0]
@@ -1000,9 +1053,14 @@ def find_form4_xml(index_url):
     return None
 
 
-def scan_sec_form4(seen, ticker_map, fetch_limit=MAX_FORM4_FETCHES):
-    """Scan EDGAR's live Form 4 feed for significant open-market insider buys."""
+def scan_sec_form4(seen, ticker_map, ledger, fetch_limit=MAX_FORM4_FETCHES):
+    """Scan EDGAR's live Form 4 feed for significant open-market insider buys.
+
+    Weighs role (CEO/CFO > director) and cluster (several insiders buying the
+    same name within 30 days) — both far more predictive than a lone buy.
+    """
     results = []
+    now = datetime.now(timezone.utc)
     feed = ET.fromstring(http_get(SEC_FORM4_ATOM_URL))
     ns = {"a": "http://www.w3.org/2005/Atom"}
     entries = [e for e in feed.findall("a:entry", ns)
@@ -1038,20 +1096,26 @@ def scan_sec_form4(seen, ticker_map, fetch_limit=MAX_FORM4_FETCHES):
         if not buy or buy["total_usd"] < MIN_INSIDER_BUY:
             continue
 
-        score = 6 if buy["total_usd"] >= 250_000 else 4
+        ticker = buy["ticker"] or ticker_map.get(cik.lstrip("0"), "")
+        cluster = record_insider_buy(ledger, ticker, buy["owner"], buy["total_usd"], now)
+        score = insider_score(buy["total_usd"], buy["role"], cluster)
         who = buy["owner"] + (" (%s)" % buy["role"] if buy["role"] else "")
         reason = "Insider-køb: %s købte for $%s i det åbne marked" % (
             who, "{:,.0f}".format(buy["total_usd"]).replace(",", "."))
+        if cluster >= 2:
+            reason += " · ⚡ klyngekøb: %d insidere seneste 30 dage" % cluster
+        if is_top_exec(buy["role"]):
+            reason += " · topledelse"
         hit = make_hit(
             id=entry_id,
             source="SEC Form 4",
             company=company,
-            ticker=buy["ticker"] or ticker_map.get(cik.lstrip("0"), ""),
+            ticker=ticker,
             cik=cik,
             title="Form 4 — %s" % company,
             url=url,
             published=entry.findtext("a:updated", "", ns),
-            detected_at=datetime.now(timezone.utc).isoformat(),
+            detected_at=now.isoformat(),
             score=score,
             tier=tier_for(score),
             reason=reason,
@@ -1252,6 +1316,7 @@ def run(doc_limit):
     known_ids = {h["id"] for h in hits}
     ticker_map = load_ticker_map()
     health = load_json(HEALTH_FILE, {})
+    insider_ledger = load_json(INSIDER_FILE, {})
 
     results = []
     try:
@@ -1261,7 +1326,7 @@ def run(doc_limit):
         log("error: SEC scan failed (%s)" % exc)
         update_health(health, "SEC 8-K", exc)
     try:
-        results += scan_sec_form4(seen, ticker_map)
+        results += scan_sec_form4(seen, ticker_map, insider_ledger)
         update_health(health, "SEC Form 4")
     except Exception as exc:
         log("warning: Form 4 scan failed (%s)" % exc)
@@ -1322,6 +1387,8 @@ def run(doc_limit):
         hits = hits[:MAX_HITS_KEPT]
     check_watchdog(health)
     save_json(HEALTH_FILE, health)
+    prune_insider_ledger(insider_ledger, datetime.now(timezone.utc))
+    save_json(INSIDER_FILE, insider_ledger)
 
     # Spend leftover AI budget on recent A/B hits still missing annotation
     # (self-healing backfill: covers runs where the key was absent/exhausted).
@@ -1497,6 +1564,22 @@ def selftest():
         "Private Fund LLC  (CIK 0009999999)") == ("Private Fund LLC", ""))
     off = datetime.now(timezone.utc).replace(minute=20)
     check("theme gate: skips off-hour (offline)", scan_themes({}, {}, now=off) == [])
+
+    # insider #2: role weighting, size, and cluster detection
+    check("insider: top exec detection", is_top_exec("Chief Financial Officer")
+          and is_top_exec("President") and not is_top_exec("Director"))
+    check("insider: director $150k = B", tier_for(insider_score(150_000, "Director", 1)) == "B")
+    check("insider: CEO $300k = A", tier_for(insider_score(300_000, "CEO", 1)) == "A")
+    check("insider: cluster lifts director to A", tier_for(insider_score(150_000, "Director", 3)) == "A")
+    led = {}
+    n0 = datetime.now(timezone.utc)
+    record_insider_buy(led, "ACME", "Alice", 200_000, n0)
+    c2 = record_insider_buy(led, "ACME", "Bob", 300_000, n0)
+    same = record_insider_buy(led, "ACME", "Alice", 100_000, n0)
+    check("insider: cluster counts distinct owners", c2 == 2 and same == 2)
+    old = {"ACME": [["Zed", (n0 - timedelta(days=50)).isoformat(), 1]]}
+    prune_insider_ledger(old, n0)
+    check("insider: ledger prunes stale", "ACME" not in old)
     check("make_hit has spy fields", all(k in make_hit()
           for k in ("spy_at_detect", "spy_1h", "spy_1d", "spy_3d")))
 
